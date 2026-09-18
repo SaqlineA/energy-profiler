@@ -1,0 +1,13 @@
+{
+  "name": "Energy Profiler",
+  "image": "mcr.microsoft.com/devcontainers/python:3.11-bookworm",
+  "postCreateCommand": "python -m pip install --only-binary=:all: -r requirements.txt",
+  "waitFor": "postCreateCommand",
+  "forwardPorts": [8000],
+  "portsAttributes": {
+    "8000": {
+      "label": "Energy Profiler — keep private",
+      "onAutoForward": "notify"
+    }
+  }
+}

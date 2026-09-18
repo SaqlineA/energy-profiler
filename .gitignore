@@ -1,0 +1,15 @@
+.venv/
+__pycache__/
+data/
+*.log
+.env
+.env.*
+*.pem
+*.key
+*.sqlite*
+*.db
+*.joblib
+*.pkl
+*.csv
+!examples/replay-demo.csv
+notes.md

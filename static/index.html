@@ -1,0 +1,280 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#101b17" />
+    <title>Current — Energy Profiler</title>
+    <link rel="stylesheet" href="/static/style.css" />
+    <script src="/static/app.js" defer></script>
+  </head>
+  <body>
+    <aside class="sidebar">
+      <a class="brand" href="#overview"
+        ><span class="brand-mark">ϟ</span> current<span class="brand-dot"
+          >.</span
+        ></a
+      >
+      <div class="workspace">
+        <span class="house-icon">⌂</span>
+        <div>My virtual home<small>Energy playground</small></div>
+      </div>
+      <div class="nav-label">WORKSPACE</div>
+      <nav aria-label="Main navigation">
+        <a class="nav-item" href="#overview"><span>◫</span> Overview</a>
+        <a class="nav-item" href="#appliances"><span>⌁</span> Appliances</a>
+        <a class="nav-item" href="#model"><span>⌘</span> Machine learning</a>
+        <a class="nav-item" href="/docs" target="_blank" rel="noopener"
+          ><span>↗</span> Explore the API</a
+        >
+      </nav>
+      <div class="side-note">
+        <span class="small-spark">✳</span>
+        <h3>A home you can experiment with.</h3>
+        <p>Switch things on. Watch the signal. See what the model thinks.</p>
+        <span class="simulation-label" id="source-badge">SIMULATED DATA</span>
+      </div>
+      <div class="sidebar-footer">
+        <span class="avatar">A</span>
+        <div>Your energy lab<small>Running on your computer</small></div>
+      </div>
+    </aside>
+
+    <main id="overview">
+      <header class="topbar">
+        <div class="breadcrumb">Workspace <span>/</span> Overview</div>
+        <span id="connection" class="connection">Connecting…</span>
+      </header>
+      <div class="content">
+        <section class="page-heading">
+          <div>
+            <div class="eyebrow">A LITTLE CLARITY ON YOUR CURRENT</div>
+            <h1>Your home, in watts.</h1>
+            <p>A live look at where your virtual home's energy goes.</p>
+          </div>
+          <a
+            class="button secondary export"
+            href="/api/export.csv"
+            aria-label="Export readings as CSV"
+            >↓ <span>Export readings</span></a
+          >
+        </section>
+        <div id="error" class="error" role="alert" hidden></div>
+        <section class="panel source-panel" aria-labelledby="source-heading">
+          <div class="panel-heading"><div><h2 id="source-heading">Choose your data</h2>
+            <p>Simulator or recorded household CSV. Everything stays on this computer.</p></div></div>
+          <form id="replay-form" class="source-controls">
+            <label>Recording <input id="csv-file" type="file" accept=".csv,text/csv" required /></label>
+            <label>Sample interval (seconds) <input id="cadence" type="number" min="0.001" max="3600" step="any" value="1" required /></label>
+            <button id="upload" class="button secondary" type="submit">Load CSV</button>
+          </form>
+          <div class="source-controls">
+            <button id="source-simulator" class="button secondary">Start simulator</button>
+            <button id="source-replay" class="button secondary">Replay CSV / restart</button>
+            <span id="replay-status" role="status">No recording loaded.</span>
+          </div>
+          <details><summary>CSV format and missing data</summary>
+            <p>Required: timestamp,total_watts. Optional measured watts: lamp,refrigerator,microwave.
+              Timestamps need a timezone (e.g. 2026-01-01T00:00:00Z). Blank watts mean unknown, not off.
+              Use one household per file; 5 MB / 50,000 rows maximum. Replay runs one row per wall-clock second,
+              but energy and chart time use original timestamps. Models must match the recording's sample interval.</p>
+          </details>
+        </section>
+
+        <section class="stats" aria-label="Session statistics">
+          <article class="stat primary">
+            <div class="stat-label">Power right now <span>ϟ</span></div>
+            <div class="stat-number">
+              <span id="power">—</span><small>W</small>
+            </div>
+            <div class="stat-foot">
+              <span class="live-dot"></span
+              ><span id="power-note">Waiting for a reading</span>
+            </div>
+          </article>
+          <article class="stat">
+            <div class="stat-label">Energy this session <span>◴</span></div>
+            <div class="stat-number">
+              <span id="energy">—</span><small>kWh</small>
+            </div>
+            <div class="stat-foot" id="duration">0 simulated seconds</div>
+          </article>
+          <article class="stat">
+            <div class="stat-label">Estimated session cost <span>＄</span></div>
+            <div class="stat-number"><span id="cost">—</span></div>
+            <div class="stat-foot" id="tariff-note">
+              Illustrative rate · $0.16 / kWh
+            </div>
+          </article>
+          <article class="stat">
+            <div class="stat-label">Appliances predicted on <span>⌘</span></div>
+            <div class="stat-number">
+              <span id="active">—</span><small>/ 3</small>
+            </div>
+            <div class="stat-foot" id="score">Model loading…</div>
+          </article>
+        </section>
+
+        <div class="main-grid">
+          <section class="panel chart-panel">
+            <div class="panel-heading">
+              <div>
+                <h2>The power picture</h2>
+                <p>Aggregate consumption · source timestamps preserved</p>
+              </div>
+              <select id="range" aria-label="Chart time range">
+                <option value="60">Last 60 readings</option>
+                <option value="300" selected>Last 300 readings</option>
+                <option value="3600">Last 3,600 readings</option>
+              </select>
+            </div>
+            <div class="chart-key">
+              <span><i class="key-dot"></i>Total power</span
+              ><span id="peak">Peak — W</span>
+            </div>
+            <div class="chart-wrap">
+              <canvas
+                id="chart"
+                role="img"
+                aria-label="Live total power chart"
+              ></canvas>
+              <div id="chart-empty">Your first readings will appear here.</div>
+            </div>
+            <div class="chart-caption">
+              <span id="chart-count">0 readings in view</span
+              ><span>Elapsed source seconds · breaks indicate gaps</span>
+            </div>
+          </section>
+
+          <section class="panel lab-panel">
+            <div class="panel-heading">
+              <div>
+                <h2>Simulation lab</h2>
+                <p>You control the household.</p>
+              </div>
+              <span class="lab-icon">⌁</span>
+            </div>
+            <div class="mode-switch" role="group" aria-label="Simulation mode">
+              <button id="auto" aria-pressed="true">Auto cycle</button
+              ><button id="manual" aria-pressed="false">Manual</button>
+            </div>
+            <p id="mode-description" class="mode-description">
+              The lamp stays on. The refrigerator cycles, and the microwave runs
+              in short bursts.
+            </p>
+            <button id="pause" class="button dark full-width">
+              Pause simulation
+            </button>
+            <div class="tariff-section">
+              <label for="rate">Electricity rate <span>USD / kWh</span></label>
+              <form id="rate-form">
+                <div class="input-prefix">
+                  <span>$</span
+                  ><input
+                    id="rate"
+                    type="number"
+                    min="0"
+                    max="10"
+                    step="0.001"
+                    value="0.16"
+                    required
+                    aria-label="Electricity rate in dollars per kilowatt-hour"
+                  />
+                </div>
+                <button class="button secondary" type="submit">Save</button>
+              </form>
+              <small>Applied only to this session's covered intervals.</small>
+            </div>
+          </section>
+        </div>
+
+        <section id="appliances" class="appliances-section">
+          <div class="section-heading">
+            <div>
+              <h2>Meet your appliances</h2>
+              <p>
+                Switch a device to enter manual mode. Predictions update on the
+                next reading.
+              </p>
+            </div>
+            <span class="pill">3 modeled appliances</span>
+          </div>
+          <div class="appliance-grid" id="appliance-cards"></div>
+        </section>
+
+        <div class="bottom-grid">
+          <section id="model" class="panel model-panel">
+            <div class="panel-heading">
+              <div>
+                <div class="eyebrow">UNDER THE HOOD</div>
+                <h2>A guess, backed by data.</h2>
+              </div>
+              <span class="model-badge">ML</span>
+            </div>
+            <p class="model-intro">
+              Two forests use the current and four preceding aggregate readings to estimate
+              each appliance's state and watts. No future readings or appliance labels enter inference.
+            </p>
+            <div class="model-metrics">
+              <div>
+                <strong id="accuracy">—</strong
+                ><span>Exact combination accuracy</span>
+              </div>
+              <div>
+                <strong id="training-count">—</strong
+                ><span>Training windows</span>
+              </div>
+            </div>
+            <div id="per-device" class="per-device"></div>
+            <div class="metrics-scroll"><table class="metrics-table">
+              <caption>Held-out appliance metrics (before uncertainty filtering)</caption>
+              <thead><tr><th>Device</th><th>Precision</th><th>Recall</th><th>F1</th><th>MAE (W)</th><th>Energy error (Wh)</th></tr></thead>
+              <tbody id="metric-rows"></tbody>
+            </table></div>
+            <p id="baselines" class="model-intro"></p>
+            <p id="live-metrics" class="model-intro">Waiting for live evaluation…</p>
+            <div class="model-footer">
+              <span id="evaluation"
+                >Evaluating on separate simulated households.</span
+              ><label>Training data <select id="train-source"><option value="synthetic">Synthetic</option><option value="recorded">Loaded labeled CSV</option></select></label><button class="button secondary" id="train">
+                ↻ Retrain model
+              </button>
+            </div>
+            <details>
+              <summary>What this result does—and doesn't—mean</summary>
+              <p id="limitation"></p>
+              <p>
+                Synthetic evaluation always uses the same 20 held-out households. Recorded training splits
+                raw time 70/30 before building windows. Blank labels are excluded, not filled with zero.
+                Uploaded data is not automatically proof of real-household accuracy.
+              </p>
+              <p id="model-provenance"></p>
+              <a href="/api/model/report" target="_blank" rel="noopener">Open full evaluation report (JSON)</a>
+            </details>
+          </section>
+
+          <section class="panel event-panel">
+            <div class="panel-heading">
+              <div>
+                <h2>Detected changes</h2>
+                <p>Confirmed over 3 predictions · delay depends on sample interval</p>
+              </div>
+              <span id="event-count" class="pill">0 events</span>
+            </div>
+            <ol id="events" class="events">
+              <li class="empty-event">
+                Waiting for the first switch. Try turning on the microwave.
+              </li>
+            </ol>
+          </section>
+        </div>
+        <footer class="page-footer">
+          <span
+            ><span class="brand-mini">ϟ</span> Current · Energy Profiler</span
+          ><span>Simulation + recorded-data replay · No hardware required</span>
+        </footer>
+      </div>
+    </main>
+    <div id="toast" class="toast" role="status" hidden></div>
+  </body>
+</html>
