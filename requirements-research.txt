@@ -1,0 +1,2 @@
+# Optional: CSV exploration only. The web server does not need pandas.
+pandas==3.0.6

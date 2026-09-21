@@ -5,6 +5,12 @@ inference → SQLite → live dashboard. No hardware, cloud account, GPU, or fro
 build tools required. **The bundled data is synthetic; real-household accuracy
 has not been established.**
 
+## Next learning milestone: real data
+
+Start with [REFIT first look](docs/refit-first-look.md): a small real-household
+sample and a readable pandas inspection script. This is data exploration only;
+it does not change the dashboard or establish real-world model accuracy.
+
 ## Run
 
 ### Edit online with GitHub Codespaces
