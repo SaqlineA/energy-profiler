@@ -22,6 +22,9 @@ GitHub sign-in protects this preview; the app itself has no login. Never change
 it to Public. Only this Codespace's exact HTTPS preview address is additionally
 allowed; local security checks remain enabled. Unsupported forwarding domains
 stop startup instead of opening access broadly.
+Start with `python app.py`: it disables Uvicorn's proxy-header interpretation so
+GitHub's rewritten HTTP localhost Host/Origin pair remains consistent. The browser
+connection still uses HTTPS. Do not substitute a default `uvicorn app:app` launch.
 
 - Change `static/index.html` for page structure, `static/style.css` for design,
   `static/app.js` for browser behavior, and `app.py` for the Python server.

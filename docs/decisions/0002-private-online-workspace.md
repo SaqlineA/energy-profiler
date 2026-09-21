@@ -31,3 +31,9 @@ public. Startup accepts only GitHub's `app.github.dev` forwarding domain.
 Codespaces stop, incur quota usage, and may expire; they are not permanent hosting.
 Recordings/models/secrets remain ignored. Commit and push code; separately export
 important generated data. No billing settings are changed by this configuration.
+
+GitHub's live tunnel was observed rewriting both Host and Origin to HTTP
+localhost:8000 while retaining X-Forwarded-Proto: https. The entrypoint disables
+Uvicorn proxy-header interpretation so same-origin checks compare the internal
+scheme consistently. External HTTPS and private-port authentication are unchanged;
+no extra origins are trusted to work around this mismatch.

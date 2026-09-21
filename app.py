@@ -421,4 +421,6 @@ app = create_app()
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="127.0.0.1", port=8000)
+    # Codespaces rewrites Host/Origin to HTTP localhost. Keep that internal scheme
+    # instead of mixing it with X-Forwarded-Proto; external HTTPS stays at GitHub.
+    uvicorn.run(app, host="127.0.0.1", port=8000, proxy_headers=False)

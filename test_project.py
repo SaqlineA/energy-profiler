@@ -2,6 +2,7 @@
 
 import csv
 import io
+import runpy
 import tempfile
 import unittest
 from pathlib import Path
@@ -14,6 +15,14 @@ from ml import ApplianceModel
 from simulator import Appliance
 from events import TransitionTracker
 from concurrent.futures import ThreadPoolExecutor
+
+
+class ServerStartupTests(unittest.TestCase):
+    def test_entrypoint_uses_internal_scheme_for_origin_checks(self):
+        with patch('uvicorn.run') as run:
+            runpy.run_path(str(Path(__file__).with_name('app.py')), run_name='__main__')
+        self.assertIs(run.call_args.kwargs.get('proxy_headers'), False)
+        self.assertEqual(run.call_args.kwargs['host'], '127.0.0.1')
 
 
 class ProjectTests(unittest.TestCase):
