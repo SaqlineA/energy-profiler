@@ -40,7 +40,8 @@ def _parse_csv(text):
             if previous is not None and timestamp <= previous:
                 raise ValueError("timestamps must increase; split households into separate files")
             row = {"timestamp": timestamp.isoformat()}
-            for key in ("total_watts", *DEVICE_IDS):
+            keys = ("total_watts", *DEVICE_IDS, *(['washing_machine'] if 'washing_machine' in reader.fieldnames else []))
+            for key in keys:
                 value = raw.get(key)
                 row[key] = None if value is None or not value.strip() else float(value)
                 if row[key] is not None and (not math.isfinite(row[key]) or not 0 <= row[key] <= MAX_WATTS):

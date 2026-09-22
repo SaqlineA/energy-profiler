@@ -7,6 +7,7 @@
     <title>Current — Energy Profiler</title>
     <link rel="stylesheet" href="/static/style.css" />
     <script src="/static/app.js" defer></script>
+    <script src="/static/experiments.js" defer></script>
   </head>
   <body>
     <aside class="sidebar">
@@ -62,7 +63,7 @@
         <div id="error" class="error" role="alert" hidden></div>
         <section class="panel source-panel" aria-labelledby="source-heading">
           <div class="panel-heading"><div><h2 id="source-heading">Choose your data</h2>
-            <p>Simulator or recorded household CSV. Everything stays on this computer.</p></div></div>
+            <p>Simulator or recorded household CSV. Data stays on the server running this app.</p></div></div>
           <form id="replay-form" class="source-controls">
             <label>Recording <input id="csv-file" type="file" accept=".csv,text/csv" required /></label>
             <label>Sample interval (seconds) <input id="cadence" type="number" min="0.001" max="3600" step="any" value="1" required /></label>
@@ -71,6 +72,7 @@
           <div class="source-controls">
             <button id="source-simulator" class="button secondary">Start simulator</button>
             <button id="source-replay" class="button secondary">Replay CSV / restart</button>
+            <button id="source-sensor" class="button secondary">Wait for local sensor</button>
             <span id="replay-status" role="status">No recording loaded.</span>
           </div>
           <details><summary>CSV format and missing data</summary>
@@ -158,6 +160,13 @@
               <button id="auto" aria-pressed="true">Auto cycle</button
               ><button id="manual" aria-pressed="false">Manual</button>
             </div>
+            <label class="profile-label">Simulation profile
+              <select id="simulation-profile">
+                <option value="classic">Original three-appliance demo</option>
+                <option value="realistic">Realistic cycles + background + noise</option>
+                <option value="expanded">Realistic + experimental washer</option>
+              </select>
+            </label>
             <p id="mode-description" class="mode-description">
               The lamp stays on. The refrigerator cycles, and the microwave runs
               in short bursts.
@@ -202,6 +211,48 @@
           <div class="appliance-grid" id="appliance-cards"></div>
         </section>
 
+        <section class="panel research-panel" aria-labelledby="research-heading">
+          <div class="panel-heading"><div><h2 id="research-heading">Actual vs. predicted</h2>
+            <p>Measured appliance watts and raw model estimates. Dashed estimates can be uncertain.</p></div></div>
+          <div class="source-controls">
+            <label>View <select id="experiment-view"><option value="">Live session</option></select></label>
+            <label>Appliance <select id="comparison-device">
+              <option value="refrigerator">Refrigerator</option><option value="lamp">Lamp</option>
+              <option value="microwave">Microwave</option><option value="washing_machine">Washing machine (experimental)</option>
+            </select></label>
+            <button id="refresh-experiments" class="button secondary">Refresh history</button>
+          </div>
+          <p id="comparison-summary" class="research-note" role="status">Waiting for readings.</p>
+          <svg id="comparison-chart" viewBox="0 0 800 230" role="img" aria-label="Appliance measured and estimated power"></svg>
+          <div class="comparison-key"><span>Solid: measured</span><span>Dashed: raw ML estimate</span></div>
+          <p id="experiment-note" class="research-note"></p>
+          <form id="experiment-form" class="source-controls">
+            <label>Frozen-model test <select id="experiment-policy">
+              <option value="strict">Strict model timing</option>
+              <option value="sample_window">Native-window diagnostic (timing mismatch allowed)</option>
+            </select></label>
+            <button id="run-experiment" class="button dark">Evaluate loaded CSV — no retraining</button>
+          </form>
+          <p class="research-note">Diagnostic mode uses consecutive recorded samples and resets across gaps over 16 seconds.
+            Its window duration differs from training. It is a stress test, not live validation. Maximum 10,000 rows.</p>
+          <div class="metrics-scroll"><table class="metrics-table">
+            <caption>Selected experiment: raw predictions on known labels only</caption>
+            <thead><tr><th>Device</th><th>Scored</th><th>On / off truth</th><th>Accuracy</th><th>F1</th><th>MAE W</th><th>Certain</th></tr></thead>
+            <tbody id="experiment-metrics"></tbody>
+          </table></div>
+          <p id="washer-status" class="research-note"></p>
+        </section>
+        <section class="panel research-panel" aria-labelledby="sessions-heading">
+          <div class="panel-heading"><div><h2 id="sessions-heading">Compare saved sessions</h2>
+            <p>Totals cover observed intervals only. Different durations and skipped gaps affect comparisons.</p></div>
+            <button id="refresh-sessions" class="button secondary">Refresh sessions</button></div>
+          <div class="metrics-scroll"><table class="metrics-table">
+            <caption>Cost recalculated at the current illustrative tariff, not a historical bill</caption>
+            <thead><tr><th>Session</th><th>Source</th><th>Readings</th><th>Covered s</th><th>kWh</th><th>Cost $</th><th>Missing / gaps</th></tr></thead>
+            <tbody id="session-metrics"></tbody>
+          </table></div>
+          <p id="session-status" class="research-note" role="status"></p>
+        </section>
         <div class="bottom-grid">
           <section id="model" class="panel model-panel">
             <div class="panel-heading">

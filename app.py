@@ -22,7 +22,7 @@ from fastapi import FastAPI, HTTPException, Query, Request
 from fastapi.responses import FileResponse, StreamingResponse, JSONResponse
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from fastapi.staticfiles import StaticFiles
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, AwareDatetime, ConfigDict, ValidationError
 
 from ml import APPLIANCES, ApplianceModel, train_recorded
 from features import WINDOW
@@ -30,6 +30,8 @@ from sources import parse_csv, valid_interval, regular_interval, seconds_between
 from simulator import Appliance
 from storage import Store
 from events import TransitionTracker
+from experiment_routes import install_experiment_routes
+from realistic import RealisticHome
 
 ROOT = Path(__file__).resolve().parent
 
@@ -37,6 +39,7 @@ ROOT = Path(__file__).resolve().parent
 class SimulationSettings(BaseModel):
     running: bool | None = None
     mode: Literal["auto", "manual"] | None = None
+    profile: Literal['classic', 'realistic', 'expanded'] | None = None
 
 
 class ApplianceSettings(BaseModel):
@@ -48,7 +51,14 @@ class TariffSettings(BaseModel):
 
 
 class SourceSettings(BaseModel):
-    source: Literal['simulator', 'replay']
+    source: Literal['simulator', 'replay', 'sensor']
+    cadence: float = Field(default=1, gt=0, le=3600, allow_inf_nan=False)
+
+
+class SensorReading(BaseModel):
+    model_config = ConfigDict(extra='forbid')
+    timestamp: AwareDatetime
+    total_watts: float | None = Field(default=None, ge=0, le=1_000_000, allow_inf_nan=False)
 
 
 class TrainSettings(BaseModel):
@@ -69,6 +79,7 @@ class EnergyProfiler:
         self.devices["lamp"].turn_on()
         self.devices["refrigerator"].turn_on()
         self.mode = "auto"
+        self.profile = 'classic'
         self.running = True
         self.rate = self.store.get_rate()  # Saved illustrative tariff, not utility data.
         self.second = 0
@@ -84,9 +95,12 @@ class EnergyProfiler:
         self.replay_rows = []
         self.replay_index = 0
         self.replay_cadence = 1.0
+        self.sensor_cadence = 1.0
         self.replay_provenance = {}
         self.window = []
         self.started_at = datetime.now(timezone.utc)
+        self.realistic_home = RealisticHome(start=self.started_at)
+        self.washer_energy = self.washer_coverage = 0.0
         self.covered_seconds = 0.0
         self.skipped_seconds = 0.0
         self.evaluated = 0
@@ -104,9 +118,13 @@ class EnergyProfiler:
         self.transitions = TransitionTracker()
         self.correct_predictions = self.evaluated = self.predicted_count = self.peak_watts = 0
         self.started_at = datetime.now(timezone.utc)
+        self.realistic_home = RealisticHome(washer=self.profile == 'expanded', start=self.started_at)
+        self.washer_energy = self.washer_coverage = 0.0
         self.running, self.error = True, None
 
     def sample(self):
+        if self.source == 'sensor':
+            return  # Readings arrive through the validated local input endpoint.
         if self.source == 'replay':
             if self.replay_index >= len(self.replay_rows):
                 self.running = False
@@ -115,6 +133,13 @@ class EnergyProfiler:
             self.replay_index += 1
             if self.replay_index == len(self.replay_rows):
                 self.running = False
+            return
+        if self.profile != 'classic':
+            raw = self.realistic_home.sample(None if self.mode == 'auto' else
+                                           {key: d.is_on for key, d in self.devices.items()})
+            for key, on in self.realistic_home.on.items():
+                self.devices[key].is_on = on
+            self.process(raw)
             return
         if self.mode == "auto":
             self.devices["lamp"].is_on = True
@@ -130,7 +155,8 @@ class EnergyProfiler:
         """Validate source time, infer from aggregate history, then commit and publish."""
         total = raw['total_watts']
         previous = self.latest
-        cadence = 1.0 if self.source == 'simulator' else self.replay_cadence
+        cadence = 1.0 if self.source == 'simulator' else (
+            self.sensor_cadence if self.source == 'sensor' else self.replay_cadence)
         dt = valid_interval(raw, previous, cadence)
         gap = previous is not None and not dt
         regular = regular_interval(raw, previous, cadence)
@@ -155,11 +181,14 @@ class EnergyProfiler:
         next_energy = self.energy_kwh + increment
         labeled = all(raw.get(d['id']) is not None for d in APPLIANCES)
         actual = sum(d['bit'] for d in APPLIANCES if raw[d['id']] >= d['threshold']) if labeled else None
-        elapsed = self.second if self.source == 'simulator' else seconds_between(raw, self.replay_rows[0])
+        elapsed = self.second if self.source == 'simulator' else (
+            previous['second'] + seconds_between(raw, previous) if previous else 0)
         reading = {
             "session": self.session, **raw, "second": elapsed,
+            "washing_machine": raw.get('washing_machine'),
             "actual_mask": actual, **result, "energy_kwh": next_energy,
-            "source": self.source, "source_id": self.replay_provenance.get('sha256') if self.source == 'replay' else 'simulator-v1',
+            "source": self.source, "source_id": self.replay_provenance.get('sha256') if self.source == 'replay' else
+                'local-sensor' if self.source == 'sensor' else f'simulator-{self.profile}',
             "quality": 'missing' if total is None else 'gap' if gap else 'irregular' if previous and not regular else 'valid',
             "interval_seconds": interval, "model_version": self.model.metrics['version'],
         }
@@ -184,12 +213,24 @@ class EnergyProfiler:
                 self.device_energy[key] += (value + previous[key]) / 2 * dt / 3_600_000
                 self.device_coverage[key] += dt
         self.window = window
+        washer = raw.get('washing_machine')
+        if washer is not None and self.source == 'simulator':
+            self.washer_energy += washer / 3_600_000
+            self.washer_coverage += 1
+        elif dt and washer is not None and previous.get('washing_machine') is not None:
+            self.washer_energy += (washer + previous['washing_machine']) / 2 * dt / 3_600_000
+            self.washer_coverage += dt
         self.latest = reading
         self.second += 1
 
     def state(self):
         return {
             "session": self.session, "running": self.running, "mode": self.mode,
+            "profile": self.profile,
+            "experimental_washer": {'watts': self.latest.get('washing_machine') if self.latest else None,
+                'energy_kwh': self.washer_energy if self.washer_coverage else None,
+                'stage': self.realistic_home.wash_stage if self.source == 'simulator' and self.profile == 'expanded' else None,
+                'note': 'Measured/simulated extra load; original live model has no washer output'},
             "rate": self.rate, "samples": self.second, "energy_kwh": self.energy_kwh,
             "cost": self.energy_kwh * self.rate, "latest": self.latest,
             "live_accuracy": self.correct_predictions / self.evaluated if self.evaluated else None,
@@ -241,6 +282,7 @@ def create_app(data_dir=None, ticking=True):
                     await task
 
     app = FastAPI(title="Energy Profiler", lifespan=lifespan)
+    install_experiment_routes(app, data_dir / 'experiments')
 
     # Only this Codespace's private preview is permitted, never a wildcard host.
     # https://docs.github.com/en/codespaces/developing-in-a-codespace/default-environment-variables-for-your-codespace
@@ -282,6 +324,12 @@ def create_app(data_dir=None, ticking=True):
         p = app.state.profiler
         return p.store.history(p.session, limit)
 
+    @app.get('/api/sessions')
+    async def sessions(limit: int = Query(default=20, ge=1, le=100)):
+        p = app.state.profiler
+        return [{**row, 'cost_at_current_rate': row['energy_kwh'] * p.rate,
+                 'current_rate': p.rate} for row in p.store.sessions(limit)]
+
     @app.get("/api/dashboard")
     async def dashboard(limit: int = Query(default=300, ge=1, le=3600),
                         after_id: int = Query(default=0, ge=0), session: str | None = None):
@@ -293,8 +341,11 @@ def create_app(data_dir=None, ticking=True):
     @app.post("/api/simulation")
     async def simulation(settings: SimulationSettings):
         p = app.state.profiler
-        if p.source == 'replay' and settings.mode is not None:
+        if p.source != 'simulator' and (settings.mode is not None or settings.profile is not None):
             raise HTTPException(409, 'Switch to simulator before changing appliance mode')
+        if settings.profile is not None and settings.profile != p.profile:
+            p.profile = settings.profile
+            p.reset_session('simulator')
         if p.source == 'replay' and settings.running and p.replay_index >= len(p.replay_rows):
             raise HTTPException(409, 'Replay complete. Select Replay CSV to restart it.')
         if settings.running is not None:
@@ -379,6 +430,34 @@ def create_app(data_dir=None, ticking=True):
         if settings.source == 'replay' and not p.replay_rows:
             raise HTTPException(409, 'Upload a CSV first')
         p.reset_session(settings.source)
+        if settings.source == 'sensor':
+            p.sensor_cadence = settings.cadence
+        return p.state()
+
+    @app.post('/api/sensor/readings', openapi_extra={'requestBody': {
+        'required': True, 'content': {'application/json': {'schema': SensorReading.model_json_schema()}}
+    }})
+    async def sensor_reading(request: Request):
+        p = app.state.profiler
+        session = p.session
+        if p.source != 'sensor' or not p.running:
+            raise HTTPException(409, 'Start an unpaused sensor session first')
+        content = bytearray()
+        async for chunk in request.stream():
+            content.extend(chunk)
+            if len(content) > 8192:
+                raise HTTPException(413, 'Sensor JSON exceeds 8 KB')
+        try:
+            reading = SensorReading.model_validate_json(content)
+        except ValidationError as exc:
+            raise HTTPException(422, 'Require timezone-aware timestamp and finite nonnegative total_watts (or null); no extra fields') from exc
+        raw = {'timestamp': reading.timestamp.astimezone(timezone.utc).isoformat(),
+               'total_watts': reading.total_watts, 'lamp': None, 'refrigerator': None, 'microwave': None}
+        if p.session != session or p.source != 'sensor' or not p.running:
+            raise HTTPException(409, 'Sensor session changed while receiving the reading; retry in the current session')
+        if p.latest and seconds_between(raw, p.latest) <= 0:
+            raise HTTPException(409, 'Duplicate or out-of-order timestamp; reading not added')
+        p.process(raw)
         return p.state()
 
     @app.get('/api/model/report')
@@ -395,7 +474,7 @@ def create_app(data_dir=None, ticking=True):
             columns = ["id", "session", "timestamp", "second", "total_watts", "lamp",
                        "refrigerator", "microwave", "actual_mask", "predicted_mask",
                        "confidence", "energy_kwh", "source", "quality", "prediction_quality",
-                       "interval_seconds", "model_version", "source_id", "unexplained_watts", "predictions"]
+                       "interval_seconds", "model_version", "source_id", "unexplained_watts", "predictions", "washing_machine"]
             writer.writerow(columns)
             yield buffer.getvalue()
             for row in store.export_rows():

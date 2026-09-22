@@ -1134,5 +1134,20 @@ details p {
 .metrics-table th, .metrics-table td { padding: 8px 6px; border-bottom: 1px solid #e7ecdf; text-align: right; }
 .metrics-table th:first-child { text-align: left; }
 .model-footer { flex-wrap: wrap; gap: 12px; }
+.bottom-grid > * { min-width: 0; }
 .model-footer label { font-size: 11px; display: grid; gap: 6px; }
 #model-provenance { overflow-wrap: anywhere; }
+.research-panel { margin: 24px 0; padding: 24px; }
+.research-note { font-size: 12px; line-height: 1.6; overflow-wrap: anywhere; color: #46513e; }
+.research-panel select { max-width: 100%; min-width: 0; }
+.research-panel .source-controls label { max-width: 100%; }
+#comparison-chart { display: block; width: 100%; height: auto; min-height: 160px; }
+.comparison-key { display: flex; flex-wrap: wrap; gap: 24px; font-size: 12px; color: #46513e; }
+.profile-label { display: grid; gap: 8px; font-size: 12px; margin-top: 16px; }
+.profile-label select { max-width: 100%; width: 100%; }
+@media (max-width: 600px) {
+  .research-panel { padding: 16px; }
+  .research-panel .panel-heading { flex-wrap: wrap; gap: 12px; }
+  .research-panel .source-controls { align-items: stretch; }
+  .research-panel .source-controls > * { width: 100%; }
+}

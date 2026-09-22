@@ -51,6 +51,8 @@ class Store:
             columns = {row['name'] for row in db.execute('PRAGMA table_info(readings_v2)')}
             if 'source_id' not in columns:
                 db.execute('ALTER TABLE readings_v2 ADD COLUMN source_id TEXT')
+            if 'washing_machine' not in columns:
+                db.execute('ALTER TABLE readings_v2 ADD COLUMN washing_machine REAL')
 
     def connect(self):
         # Streaming responses may resume on different worker threads, serially.
@@ -92,3 +94,13 @@ class Store:
         with closing(self.connect()) as db:
             for row in db.execute("SELECT * FROM readings_v2 ORDER BY id"):
                 yield self.decode(row)
+
+    def sessions(self, limit=20):
+        with closing(self.connect()) as db:
+            rows = db.execute('''SELECT session, source, COUNT(*) AS samples,
+                MIN(timestamp) AS first_timestamp, MAX(timestamp) AS last_timestamp,
+                MAX(energy_kwh) AS energy_kwh, SUM(interval_seconds) AS covered_seconds,
+                SUM(CASE WHEN quality = 'missing' THEN 1 ELSE 0 END) AS missing_rows,
+                SUM(CASE WHEN quality = 'gap' THEN 1 ELSE 0 END) AS gap_rows
+                FROM readings_v2 GROUP BY session, source ORDER BY MAX(id) DESC LIMIT ?''', (limit,)).fetchall()
+        return [dict(row) for row in rows]

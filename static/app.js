@@ -82,8 +82,8 @@ function buildCards(devices) {
 
 function updateControls() {
   $("pause").disabled = !online || busy;
-  $("auto").disabled = !online || busy || state?.source === 'replay';
-  $("manual").disabled = !online || busy || state?.source === 'replay';
+  $("auto").disabled = !online || busy || state?.source !== 'simulator';
+  $("manual").disabled = !online || busy || state?.source !== 'simulator';
   $("train").disabled = !online || training;
   $("upload").disabled = !online || busy || training;
   $("source-simulator").disabled = !online || busy;
@@ -100,7 +100,7 @@ function render() {
   if (!$("appliance-cards").children.length) buildCards(state.appliances);
   const r = state.latest;
   if (loadedSession !== state.session) readings = [];
-  $("source-badge").textContent = state.source === 'simulator' ? 'SIMULATED DATA' : 'RECORDED CSV';
+  $("source-badge").textContent = state.source === 'simulator' ? 'SIMULATED DATA' : state.source === 'sensor' ? 'LOCAL SENSOR INPUT' : 'RECORDED CSV';
   $("replay-status").textContent = state.replay.loaded
     ? `${state.replay.provenance.name} · ${state.replay.position}/${state.replay.loaded} rows · ${state.replay.cadence_seconds}s interval`
     : 'No recording loaded.';
@@ -108,7 +108,7 @@ function render() {
     ? r.total_watts.toLocaleString(undefined, { maximumFractionDigits: 1 })
     : "—";
   $("power-note").textContent = state.running
-    ? (state.source === 'simulator' ? "Live simulated consumption" : "Recorded-data replay")
+    ? (state.source === 'simulator' ? "Live simulated consumption" : state.source === 'sensor' ? "Local sensor input" : "Recorded-data replay")
     : "Paused · showing last reading";
   $("energy").textContent = state.energy_kwh.toFixed(4);
   $("duration").textContent =
@@ -128,7 +128,7 @@ function render() {
   $("auto").setAttribute("aria-pressed", state.mode === "auto");
   $("manual").setAttribute("aria-pressed", state.mode === "manual");
   $("mode-description").textContent =
-    state.source === 'replay' ? 'Replay preserves source time. Gaps are not counted as zero consumption. Appliance switches are disabled.' : state.mode === "auto"
+    state.source === 'sensor' ? 'Waiting for POST /api/sensor/readings. Loopback only; no physical hardware has been verified.' : state.source === 'replay' ? 'Replay preserves source time. Gaps are not counted as zero consumption. Appliance switches are disabled.' : state.profile !== 'classic' ? 'Seeded cycles, varying wattage, startup spikes, unknown background and measurement noise. Washer stages are compressed demo timings.' : state.mode === "auto"
       ? "The lamp stays on. The refrigerator cycles, and the microwave runs in short bursts."
       : "Use the appliance switches below. Try combining loads to see when the model gets confused.";
   if (!tariffInitialized) {
@@ -189,6 +189,7 @@ function render() {
   error(state.error);
   updateControls();
   drawChart();
+  window.energyResearch?.render(state, readings);
 }
 
 function drawChart() {

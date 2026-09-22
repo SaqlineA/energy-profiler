@@ -220,6 +220,84 @@ class PipelineTests(unittest.TestCase):
         self.assertEqual(response.status_code, 422)
         self.assertEqual(self.p.model.metrics['version'], version)
 
+    def test_frozen_experiment_history_and_safe_ids(self):
+        self.upload(recording(12, labels=False))
+        version = self.p.model.metrics['version']
+        response = self.client.post('/api/experiments', json={'policy': 'strict'})
+        self.assertEqual(response.status_code, 200, response.text)
+        report = response.json()
+        self.assertEqual(report['prediction_windows'], 8)
+        self.assertIsNone(report['devices']['refrigerator']['accuracy'])
+        self.assertEqual(self.p.model.metrics['version'], version)
+        history = self.client.get('/api/experiments').json()
+        self.assertEqual(history[0]['id'], report['id'])
+        detail = self.client.get('/api/experiments/' + report['id']).json()
+        self.assertEqual(len(detail['points']), 12)
+        self.assertEqual(self.client.get('/api/experiments/not-an-id').status_code, 422)
+
+    def test_sensor_mode_uses_source_time_and_rejects_duplicates(self):
+        self.assertEqual(self.client.post('/api/sensor/readings', json={
+            'timestamp': '2026-01-01T00:00:00Z', 'total_watts': 100}).status_code, 409)
+        self.assertEqual(self.client.post('/api/source', json={'source': 'sensor', 'cadence': 1}).status_code, 200)
+        self.p.sample()
+        self.assertEqual(self.p.second, 0)
+        for i in (0, 1):
+            response = self.client.post('/api/sensor/readings', json={
+                'timestamp': f'2026-01-01T00:00:0{i}Z', 'total_watts': 100})
+            self.assertEqual(response.status_code, 200, response.text)
+        self.assertAlmostEqual(self.p.energy_kwh, 100 / 3_600_000)
+        self.assertIsNone(self.p.latest['lamp'])
+        self.assertEqual(self.client.post('/api/sensor/readings', json={
+            'timestamp': '2026-01-01T00:00:01Z', 'total_watts': 100}).status_code, 409)
+        self.assertEqual(self.client.post('/api/sensor/readings', json={
+            'timestamp': '2026-01-01T00:00:02', 'total_watts': 100}).status_code, 422)
+        self.assertEqual(self.p.second, 2)
+
+    def test_200_row_replay_energy_and_cost(self):
+        start = datetime(2026, 1, 1, tzinfo=timezone.utc)
+        rows = [{'timestamp': (start + timedelta(seconds=i * 8)).isoformat(),
+                 'total_watts': 100 + i, 'lamp': None, 'refrigerator': 50, 'microwave': None}
+                for i in range(200)]
+        response = self.client.post('/api/replay?cadence=8', content=csv_text(rows))
+        self.assertEqual(response.status_code, 200)
+        self.client.post('/api/source', json={'source': 'replay'})
+        for _ in rows:
+            self.p.sample()
+        expected = (100 + 299) / 2 * (199 * 8) / 3_600_000
+        self.assertAlmostEqual(self.p.energy_kwh, expected)
+        self.assertAlmostEqual(self.p.state()['cost'], expected * self.p.rate)
+        self.assertEqual(self.p.covered_seconds, 199 * 8)
+        self.assertEqual(self.p.latest['timestamp'], rows[-1]['timestamp'])
+        self.assertEqual(self.p.latest['prediction_quality'], 'cadence_mismatch')
+
+    def test_sensor_limits_and_session_summary(self):
+        self.client.post('/api/source', json={'source': 'sensor', 'cadence': 1})
+        invalid = [
+            {'timestamp': '2026-01-01T00:00:00Z', 'total_watts': -1},
+            {'timestamp': '2026-01-01T00:00:00Z', 'total_watts': 10, 'lamp': 10},
+        ]
+        for body in invalid:
+            self.assertEqual(self.client.post('/api/sensor/readings', json=body).status_code, 422)
+        self.assertEqual(self.client.post('/api/sensor/readings', content=' ' * 8193).status_code, 413)
+        for second in (0, 1, 5):
+            self.client.post('/api/sensor/readings', json={
+                'timestamp': f'2026-01-01T00:00:0{second}Z', 'total_watts': 100})
+        row = self.client.get('/api/sessions').json()[0]
+        self.assertEqual(row['samples'], 3)
+        self.assertEqual(row['covered_seconds'], 1)
+        self.assertEqual(row['gap_rows'], 1)
+        self.assertAlmostEqual(row['energy_kwh'], 100 / 3_600_000)
+        self.assertAlmostEqual(row['cost_at_current_rate'], row['energy_kwh'] * self.p.rate)
+        self.assertEqual(self.client.get('/api/sessions?limit=101').status_code, 422)
+
+    def test_realistic_profile_and_expanded_washer(self):
+        response = self.client.post('/api/simulation', json={'profile': 'expanded'})
+        self.assertEqual(response.status_code, 200, response.text)
+        self.p.sample()
+        self.assertIn('washing_machine', self.p.latest)
+        self.assertGreater(self.p.latest['total_watts'], sum(self.p.latest[k] for k in ('lamp', 'refrigerator', 'microwave', 'washing_machine')))
+        self.assertEqual(self.p.store.history(self.p.session)[0]['washing_machine'], self.p.latest['washing_machine'])
+
     def test_private_codespace_preview_boundary(self):
         host = 'my-learning-space-123-8000.app.github.dev'
         environment = {'CODESPACES': 'true', 'CODESPACE_NAME': 'my-learning-space-123',
