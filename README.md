@@ -5,11 +5,12 @@ inference → SQLite → live dashboard. No hardware, cloud account, GPU, or fro
 build tools required. **The bundled data is synthetic; real-household accuracy
 has not been established.**
 
-## Next learning milestone: real data
+## Software roadmap: real-data experiments
 
-Start with [REFIT first look](docs/refit-first-look.md): a small real-household
-sample and a readable pandas inspection script. This is data exploration only;
-it does not change the dashboard or establish real-world model accuracy.
+See the [software roadmap guide](docs/software-roadmap.md) for real CSV replay,
+frozen-model evaluation, realistic simulation, research comparisons, dashboard
+analytics and the local sensor contract. It includes measured results and important
+limitations. [REFIT first look](docs/refit-first-look.md) explains the source data.
 
 ## Run
 
