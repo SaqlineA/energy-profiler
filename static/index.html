@@ -6,6 +6,7 @@
     <meta name="theme-color" content="#101b17" />
     <title>Current — Energy Profiler</title>
     <link rel="stylesheet" href="/static/style.css" />
+    <link rel="stylesheet" href="/static/fluid.css" />
     <script src="/static/app.js" defer></script>
     <script src="/static/experiments.js" defer></script>
   </head>
@@ -65,9 +66,9 @@
         </section>
         <div id="error" class="error" role="alert" hidden></div>
         <nav class="journey" aria-label="Dashboard sections">
-          <a href="#overview"><span>01</span> Monitor your home</a>
-          <a href="#research"><span>02</span> Test a prediction</a>
-          <a href="#sessions"><span>03</span> Compare sessions</a>
+          <a href="#overview">Overview</a>
+          <a href="#research">Experiments</a>
+          <a href="#sessions">Sessions</a>
         </nav>
         <details class="panel source-panel" id="data-source">
           <summary><span><strong id="source-heading">Data source & import</strong><small>Simulator, recorded CSV or local sensor · expand to change</small></span></summary>
