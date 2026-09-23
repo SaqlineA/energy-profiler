@@ -33,4 +33,10 @@ support retain near-opaque backgrounds.
 - Platform notes: preserve web semantics instead of copying macOS window chrome.
 
 Preference media queries alone do not constitute an accessibility certification.
-Runtime verification and limitations are recorded with the delivery.
+Runtime checks passed at 320, 768, 1024 and 1440 CSS pixels with no page-level
+horizontal overflow. Keyboard Enter opens and closes source settings. The
+House 2 report renders its chart, uncertainty note and metrics; no browser
+console errors were observed. These visual checks used the browser's dark theme.
+Light theme and reduced-motion/transparency preferences were code-reviewed,
+not separately emulated. All 48 application and four research tests passed;
+both JavaScript files passed Node syntax checks.
