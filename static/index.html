@@ -10,6 +10,7 @@
     <script src="/static/experiments.js" defer></script>
   </head>
   <body>
+    <a class="skip-link" href="#overview">Skip to dashboard</a>
     <aside class="sidebar">
       <a class="brand" href="#overview"
         ><span class="brand-mark">ϟ</span> current<span class="brand-dot"
@@ -24,6 +25,8 @@
       <nav aria-label="Main navigation">
         <a class="nav-item" href="#overview"><span>◫</span> Overview</a>
         <a class="nav-item" href="#appliances"><span>⌁</span> Appliances</a>
+        <a class="nav-item" href="#research"><span>⌁</span> Experiments</a>
+        <a class="nav-item" href="#sessions"><span>◷</span> Sessions</a>
         <a class="nav-item" href="#model"><span>⌘</span> Machine learning</a>
         <a class="nav-item" href="/docs" target="_blank" rel="noopener"
           ><span>↗</span> Explore the API</a
@@ -49,9 +52,9 @@
       <div class="content">
         <section class="page-heading">
           <div>
-            <div class="eyebrow">A LITTLE CLARITY ON YOUR CURRENT</div>
+            <div class="eyebrow">CURRENT / ENERGY RESEARCH LAB</div>
             <h1>Your home, in watts.</h1>
-            <p>A live look at where your virtual home's energy goes.</p>
+            <p>Follow the signal. Explore each appliance. Test what the model really knows.</p>
           </div>
           <a
             class="button secondary export"
@@ -61,9 +64,14 @@
           >
         </section>
         <div id="error" class="error" role="alert" hidden></div>
-        <section class="panel source-panel" aria-labelledby="source-heading">
-          <div class="panel-heading"><div><h2 id="source-heading">Choose your data</h2>
-            <p>Simulator or recorded household CSV. Data stays on the server running this app.</p></div></div>
+        <nav class="journey" aria-label="Dashboard sections">
+          <a href="#overview"><span>01</span> Monitor your home</a>
+          <a href="#research"><span>02</span> Test a prediction</a>
+          <a href="#sessions"><span>03</span> Compare sessions</a>
+        </nav>
+        <details class="panel source-panel" id="data-source">
+          <summary><span><strong id="source-heading">Data source & import</strong><small>Simulator, recorded CSV or local sensor · expand to change</small></span></summary>
+          <p class="research-note">Data stays on the server running this app. Changing source starts a new session; saved readings remain available.</p>
           <form id="replay-form" class="source-controls">
             <label>Recording <input id="csv-file" type="file" accept=".csv,text/csv" required /></label>
             <label>Sample interval (seconds) <input id="cadence" type="number" min="0.001" max="3600" step="any" value="1" required /></label>
@@ -81,7 +89,7 @@
               Use one household per file; 5 MB / 50,000 rows maximum. Replay runs one row per wall-clock second,
               but energy and chart time use original timestamps. Models must match the recording's sample interval.</p>
           </details>
-        </section>
+        </details>
 
         <section class="stats" aria-label="Session statistics">
           <article class="stat primary">
@@ -211,8 +219,8 @@
           <div class="appliance-grid" id="appliance-cards"></div>
         </section>
 
-        <section class="panel research-panel" aria-labelledby="research-heading">
-          <div class="panel-heading"><div><h2 id="research-heading">Actual vs. predicted</h2>
+        <section class="panel research-panel" id="research" aria-labelledby="research-heading">
+          <div class="panel-heading"><div><div class="eyebrow">EXPERIMENT WORKBENCH</div><h2 id="research-heading">Actual vs. predicted</h2>
             <p>Measured appliance watts and raw model estimates. Dashed estimates can be uncertain.</p></div></div>
           <div class="source-controls">
             <label>View <select id="experiment-view"><option value="">Live session</option></select></label>
@@ -226,6 +234,8 @@
           <svg id="comparison-chart" viewBox="0 0 800 230" role="img" aria-label="Appliance measured and estimated power"></svg>
           <div class="comparison-key"><span>Solid: measured</span><span>Dashed: raw ML estimate</span></div>
           <p id="experiment-note" class="research-note"></p>
+          <details class="evaluation-settings">
+          <summary>Run a new frozen-model evaluation</summary>
           <form id="experiment-form" class="source-controls">
             <label>Frozen-model test <select id="experiment-policy">
               <option value="strict">Strict model timing</option>
@@ -235,6 +245,7 @@
           </form>
           <p class="research-note">Diagnostic mode uses consecutive recorded samples and resets across gaps over 16 seconds.
             Its window duration differs from training. It is a stress test, not live validation. Maximum 10,000 rows.</p>
+          </details>
           <div class="metrics-scroll"><table class="metrics-table">
             <caption>Selected experiment: raw predictions on known labels only</caption>
             <thead><tr><th>Device</th><th>Scored</th><th>On / off truth</th><th>Accuracy</th><th>F1</th><th>MAE W</th><th>Certain</th></tr></thead>
@@ -242,7 +253,7 @@
           </table></div>
           <p id="washer-status" class="research-note"></p>
         </section>
-        <section class="panel research-panel" aria-labelledby="sessions-heading">
+        <section class="panel research-panel" id="sessions" aria-labelledby="sessions-heading">
           <div class="panel-heading"><div><h2 id="sessions-heading">Compare saved sessions</h2>
             <p>Totals cover observed intervals only. Different durations and skipped gaps affect comparisons.</p></div>
             <button id="refresh-sessions" class="button secondary">Refresh sessions</button></div>
