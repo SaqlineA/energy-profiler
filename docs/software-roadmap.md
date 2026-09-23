@@ -146,3 +146,7 @@ integration; the dashboard was checked in a real browser.
 Next, explain why the zero-watt baseline has a low MAE despite detecting no fridge
 activity. Then collect a longer recording with both on and off periods from a
 different house before tuning further. This is the most useful next ML milestone.
+
+Checkpoint update: the [independent House 2 diagnostic](independent-house-check.md)
+is complete, with timing incompatibility and energy overestimation documented.
+Next is a cadence-aware evaluation protocol, not automatic live-model promotion.
