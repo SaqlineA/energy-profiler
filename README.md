@@ -11,6 +11,8 @@ See the [software roadmap guide](docs/software-roadmap.md) for real CSV replay,
 frozen-model evaluation, realistic simulation, research comparisons, dashboard
 analytics and the local sensor contract. It includes measured results and important
 limitations. [REFIT first look](docs/refit-first-look.md) explains the source data.
+The [extended REFIT check](docs/extended-refit-check.md) adds 9,800 real readings,
+five saved stress-test reports and the dashboard usability refresh.
 
 ## Run
 
