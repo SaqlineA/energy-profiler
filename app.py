@@ -287,7 +287,8 @@ def create_app(data_dir=None, ticking=True):
     # Only this Codespace's private preview is permitted, never a wildcard host.
     # https://docs.github.com/en/codespaces/developing-in-a-codespace/default-environment-variables-for-your-codespace
     cloud_origin = None
-    allowed_hosts = ['localhost', '127.0.0.1', 'testserver']
+    render_host = 'current-energy-profiler.onrender.com'
+    allowed_hosts = ['localhost', '127.0.0.1', 'testserver', render_host]
     if os.environ.get('CODESPACES') == 'true':
         name = os.environ.get('CODESPACE_NAME', '')
         domain = os.environ.get('GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN', '')
