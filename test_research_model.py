@@ -7,6 +7,21 @@ from research_model import ResearchModel, make_features
 
 
 class ResearchModelTests(unittest.TestCase):
+    def test_fridge_only_models_do_not_require_other_labels(self):
+        sessions = [s[::8] for s in realistic_sessions(90, 1, 400)]
+        for row in sessions[0]:
+            row['lamp'] = row['microwave'] = None
+        for algorithm in ('always_off', 'decision_tree', 'random_forest'):
+            with self.subTest(algorithm=algorithm):
+                model = ResearchModel(sessions, algorithm=algorithm, cadence=8, fridge_only=True)
+                report = evaluate_model(model, sessions[0], cadence=8)
+                self.assertEqual(set(report['devices']), {'refrigerator'})
+                self.assertEqual(report['prediction_windows'], 46)
+                self.assertEqual(model.metrics['train_samples'], 46)
+                self.assertEqual(set(report['points'][-1]['predictions']), {'refrigerator'})
+        with self.assertRaises(ValueError):
+            ResearchModel(sessions, fridge_only=True, washer=True)
+
     def test_eight_second_training_matches_strict_evaluation(self):
         sessions = [s[::8] for s in realistic_sessions(90, 2, 160)]
         model = ResearchModel(sessions, algorithm='decision_tree', cadence=8)
