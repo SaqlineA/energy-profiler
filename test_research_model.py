@@ -7,6 +7,26 @@ from research_model import ResearchModel, make_features
 
 
 class ResearchModelTests(unittest.TestCase):
+    def test_eight_second_training_matches_strict_evaluation(self):
+        sessions = [s[::8] for s in realistic_sessions(90, 2, 160)]
+        model = ResearchModel(sessions, algorithm='decision_tree', cadence=8)
+        self.assertEqual(model.metrics['cadence_seconds'], 8)
+        self.assertEqual(model.metrics['train_samples'], 32)
+        report = evaluate_model(model, sessions[0], cadence=8)
+        self.assertEqual(report['prediction_windows'], 16)
+        self.assertEqual(report['window_span_seconds'], {'min': 32, 'max': 32})
+        self.assertEqual(evaluate_model(model, sessions[0], cadence=1)['prediction_windows'], 0)
+
+    def test_cadence_validation_and_training_gap_reset(self):
+        sessions = [s[::8] for s in realistic_sessions(90, 1, 160)]
+        for cadence in (0, -1, float('nan'), float('inf'), 3601):
+            with self.subTest(cadence=cadence), self.assertRaises(ValueError):
+                ResearchModel(sessions, algorithm='decision_tree', cadence=cadence)
+        # Removing one sample makes a 16-second gap, larger than 1.5 * cadence.
+        del sessions[0][9]
+        model = ResearchModel(sessions, algorithm='decision_tree', cadence=8)
+        self.assertEqual(model.metrics['train_samples'], (9 - 4) + (10 - 4))
+
     def test_features_are_trailing_and_window_specific(self):
         self.assertEqual(make_features([1, 2, 3, 4, 5], 'summary')[:2], [5, 1])
         self.assertEqual(make_features([1, 2, 3], 'watts'), [3])

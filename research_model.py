@@ -1,8 +1,10 @@
 """Experimental models are separate from the live three-appliance baseline."""
 import hashlib
 import json
+import math
 
 import numpy as np
+import sklearn
 from sklearn.dummy import DummyClassifier, DummyRegressor
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor
@@ -29,7 +31,9 @@ def make_features(values, mode='summary'):
 
 class ResearchModel:
     def __init__(self, sessions, window=5, mode='summary', algorithm='random_forest',
-                 washer=False, seed=42, profile='realistic'):
+                 washer=False, seed=42, profile='realistic', cadence=1):
+        if not math.isfinite(cadence) or not 0 < cadence <= 3600:
+            raise ValueError('Cadence must be finite, positive and at most 3600 seconds')
         if window not in (5, 10, 20, 30) or mode not in ('watts', 'summary', 'history'):
             raise ValueError('Unsupported feature configuration')
         self.mode = mode
@@ -38,7 +42,7 @@ class ResearchModel:
         for session in sessions:
             history, previous = [], None
             for row in session:
-                if not valid_interval(row, previous, 1) or not regular_interval(row, previous, 1):
+                if not valid_interval(row, previous, cadence) or not regular_interval(row, previous, cadence):
                     history = []
                 if row['total_watts'] is not None:
                     history = (history + [row['total_watts']])[-window:]
@@ -65,7 +69,8 @@ class ResearchModel:
         self.regressor.fit(x, power)
         self.power_bounds = (min(v[0] for v in x), max(v[0] for v in x))
         self.metrics = {'algorithm': algorithm, 'window': window, 'feature': mode,
-                        'cadence_seconds': 1, 'seed': seed, 'train_samples': len(x),
+                        'cadence_seconds': cadence, 'seed': seed, 'train_samples': len(x),
+                        'sklearn_version': sklearn.__version__,
                         'training_source': profile, 'experimental': True,
                         'thresholds_watts': {d['id']: d['threshold'] for d in self.devices},
                         'provenance': {'split': 'separate generated sessions; evaluation supplied separately',
