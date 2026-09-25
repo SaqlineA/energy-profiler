@@ -80,6 +80,10 @@ class ResearchModel:
         self.metrics = {'algorithm': algorithm, 'window': window, 'feature': mode,
                         'cadence_seconds': cadence, 'seed': seed, 'train_samples': len(x),
                         'sklearn_version': sklearn.__version__,
+                        'train_class_support': {d['id']: {
+                            'on': sum(row[i] for row in y),
+                            'off': len(y) - sum(row[i] for row in y)}
+                            for i, d in enumerate(self.devices)},
                         'training_source': profile, 'experimental': True,
                         'thresholds_watts': {d['id']: d['threshold'] for d in self.devices},
                         'provenance': {'split': 'supplied training sessions; evaluation supplied separately',

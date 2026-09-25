@@ -22,6 +22,13 @@ class ResearchModelTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             ResearchModel(sessions, fridge_only=True, washer=True)
 
+    def test_single_class_training_support_is_explicit(self):
+        sessions = [s[::8] for s in realistic_sessions(90, 1, 160)]
+        for row in sessions[0]:
+            row['refrigerator'] = 0
+        model = ResearchModel(sessions, algorithm='decision_tree', cadence=8, fridge_only=True)
+        self.assertEqual(model.metrics['train_class_support']['refrigerator'], {'on': 0, 'off': 16})
+
     def test_eight_second_training_matches_strict_evaluation(self):
         sessions = [s[::8] for s in realistic_sessions(90, 2, 160)]
         model = ResearchModel(sessions, algorithm='decision_tree', cadence=8)
