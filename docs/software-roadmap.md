@@ -151,4 +151,7 @@ Checkpoint update: the [independent House 2 diagnostic](independent-house-check.
 is complete, with timing incompatibility and energy overestimation documented.
 The [cadence-aware protocol and first comparison](cadence-protocol.md) are now
 implemented: matching eight-second training/evaluation, three fixed candidates,
-and no automatic live-model promotion. Real-data partitioning is next.
+and no automatic live-model promotion. The [real-data split](real-data-split.md)
+is now frozen: House 1 training, House 2 development, House 5 reserved final test.
+Next is isolated fridge-only fitting and development evaluation; do not score
+the reserved final recording until model choices are frozen.
