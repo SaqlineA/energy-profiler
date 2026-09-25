@@ -149,4 +149,6 @@ different house before tuning further. This is the most useful next ML milestone
 
 Checkpoint update: the [independent House 2 diagnostic](independent-house-check.md)
 is complete, with timing incompatibility and energy overestimation documented.
-Next is a cadence-aware evaluation protocol, not automatic live-model promotion.
+The [cadence-aware protocol and first comparison](cadence-protocol.md) are now
+implemented: matching eight-second training/evaluation, three fixed candidates,
+and no automatic live-model promotion. Real-data partitioning is next.

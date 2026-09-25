@@ -26,3 +26,38 @@ House 2 is **not an untouched final test**: its prefix has already been inspecte
 Do not use its results to tune this comparison. A later real-data trial must
 declare its training/development houses and a genuinely untouched final recording.
 No interpolation or gap-filling of REFIT is authorized by this protocol.
+
+## Run and inspect
+
+```powershell
+python cadence_comparison.py
+```
+
+Open dashboard **Experiments → Refresh history**, then choose a report named
+`Cadence v1 / ... / synthetic 8s`. This uses the existing charts and metrics;
+no new server route or frontend dependency is needed. Reports are local to the
+machine running the command; Git does not transfer them into a Codespace.
+
+## First fixed run (2026-09-25)
+
+Each model trained on 2,210 windows and scored the same 663 held-out windows
+from three sessions. Energy comparison covers 5,280 seconds, excluding warmup
+and session boundaries. All feature windows span exactly 32 seconds.
+
+| Model | Fridge F1 | Fridge MAE W | Fridge absolute energy error kWh | Lamp F1 | Microwave F1 |
+|---|---:|---:|---:|---:|---:|
+| Always off | 0.000 | 84.74 | 0.12383 | 0.000 | 0.000 |
+| Decision Tree | 0.863 | 45.57 | 0.02874 | 0.484 | 1.000 |
+| Random Forest | 0.880 | 43.68 | 0.02614 | 0.539 | 1.000 |
+
+Fridge on/off support is 319/344. Random Forest estimates 0.09769 kWh against
+0.12383 kWh measured by the simulator, about 21% low, and only 183 of 663 fridge
+predictions pass the existing uncertainty heuristic. Signed errors can cancel
+in total energy. Lamp MAE is worse than always-off for both learned models.
+Perfect microwave F1 here reflects a limited synthetic benchmark, not real-world
+perfection. No live model was changed, and no House 2 data entered fitting.
+
+Next checkpoint: declare real-data development/training partitions and an
+untouched evaluation recording, then test without silently interpolating irregular
+samples. Cadence matching fixes a methodology problem; it does not fix the
+simulator-to-household domain gap or establish sensor calibration.
