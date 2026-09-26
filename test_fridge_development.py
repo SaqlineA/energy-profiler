@@ -7,7 +7,7 @@ from unittest.mock import patch
 from fridge_development import run_development
 from real_data_split import freeze_split
 from realistic import realistic_sessions
-from sources import parse_csv
+from sources import parse_csv, thin_to_cadence
 
 
 class FridgeDevelopmentTests(unittest.TestCase):
@@ -48,6 +48,17 @@ class FridgeDevelopmentTests(unittest.TestCase):
                 run_development(manifest, root / 'rejected')
             self.assertFalse((root / 'rejected').exists())
         self.assertEqual(live.read_bytes() if live.exists() else None, before)
+
+    def test_thinning_keeps_real_readings_only(self):
+        # House 1 style bursts: 1 s then 14 s apart, repeating.
+        seconds = [0, 1, 15, 16, 30, 31, 45, None, 60]
+        rows = [{'timestamp': f'2026-01-01T00:{s // 60:02d}:{s % 60:02d}+00:00' if s is not None
+                 else '2026-01-01T00:00:50+00:00', 'total_watts': None if s is None else float(i)}
+                for i, s in enumerate(seconds)]
+        kept = thin_to_cadence(rows, 16)
+        self.assertEqual([r['timestamp'][-11:-6] for r in kept], ['00:00', '00:15', '00:30', '00:45', '01:00'])
+        self.assertTrue(all(r in rows for r in kept))  # Selected, never modified or created.
+        self.assertTrue(all(r['total_watts'] is not None for r in kept))
 
 
 if __name__ == '__main__':
