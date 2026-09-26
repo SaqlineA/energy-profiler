@@ -147,3 +147,36 @@ within the window.
 helped, hurt or made essentially no difference, and run it once. If it fails,
 the next idea gets a new declared protocol, not a tweak to this one. House 5
 stays unscored.
+
+## v3 result (2026-09-26): mixed; the failure mode changed but detection was not fixed
+
+Run once. The same 4,368 training windows (886 on / 3,482 off) and the same 3,867
+House 2 windows (1,256 on / 2,611 off) with 57,744 s of energy coverage as v2.
+
+| Random Forest | F1 | Accuracy | MAE W | Estimated / measured kWh | TP / FP / FN / TN |
+|---|---:|---:|---:|---|---|
+| v2 (absolute summary) | 0.406 | 28.55% | 52.61 | 0.960 / 0.453 | 945 / 2,452 / 311 / 159 |
+| v3 (relative) | 0.181 | 70.70% | 21.97 | 0.143 / 0.453 | 125 / 2 / 1,131 / 2,609 |
+| Always off (reference) | 0.000 | 67.52% | 28.34 | 0 / 0.453 | 0 / 0 / 1,256 / 2,611 |
+
+The v3 Decision Tree scored F1 0.282, accuracy 71.53%, MAE 19.94 W and
+0.174 / 0.453 kWh. No candidate is selected on the basis of this.
+
+**What changed.** False positives almost disappeared, falling from 2,452 to 2.
+This fits the hypothesis: v2's flood of "on" predictions was driven by House 2's
+absolute load level. For the first time, a learned model beats always-off on
+accuracy and MAE, though only narrowly (70.7% vs 67.5%, and 22.0 vs 28.3 W).
+
+**What did not.** Recall fell from 75% to 10%. The model now misses about nine in
+ten fridge-on windows and underestimates energy by about 68%. The absolute energy
+error is smaller (0.31 kWh vs 0.51 kWh), but only because it went from roughly
+double to roughly a third of the true value. F1 fell from 0.406 to 0.181.
+No window passes the uncertainty heuristic.
+
+**Verdict: mixed.** It is not a usable detector and should not be called an
+improvement. The evidence supports part of the hypothesis: absolute wattage
+caused the false positives. Removing it does not reveal a fridge signal that
+transfers between houses. Possible reasons, all untested: the fridges differ in
+power and cycle pattern, a 30-minute minimum is sometimes a poor background, or
+64-second windows at 16 s rarely capture a clear switch-on step. v3 is not
+adjusted further. House 5 remains unscored.
