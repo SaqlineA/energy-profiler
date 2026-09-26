@@ -94,12 +94,15 @@ def load(path):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--real', nargs='*', type=Path,
-                        default=[Path('data/refit/house1-replay-10000.csv'), Path('data/refit/house2-replay-10000.csv')])
+                        default=[Path(f'data/refit/house{h}-replay-10000.csv') for h in (1, 2, 3, 4)])
     args = parser.parse_args()
     result = {
         # Live model generator (current.json provenance) and research simulator (cadence v1 seeds).
         'live_generator_synthetic_households': profile(synthetic_households(43, 60)),
         'research_simulator_realistic': profile(realistic_sessions(42, 10, 1800)),
+        # Same long sessions for both fridge versions; v2 cycles need hours to complete.
+        'research_simulator_v1_12h': profile(realistic_sessions(42, 4, 43200)),
+        'research_simulator_v2_12h': profile(realistic_sessions(42, 4, 43200, fridge='v2')),
         **{path.stem: profile([load(path)]) for path in args.real},
     }
     print(json.dumps(result, indent=2))

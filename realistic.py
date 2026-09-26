@@ -11,7 +11,9 @@ WASHER = {'id': 'washing_machine', 'name': 'Washing machine', 'watts': 1800,
 
 
 class RealisticHome:
-    def __init__(self, seed=42, washer=False, start=None):
+    def __init__(self, seed=42, washer=False, start=None, fridge='v1'):
+        if fridge not in ('v1', 'v2'):
+            raise ValueError('Unknown fridge model')
         self.rng = random.Random(seed)
         self.second = 0
         self.start = start or datetime(2020, 1, 1, tzinfo=timezone.utc)
@@ -26,6 +28,14 @@ class RealisticHome:
         self.background = self.rng.uniform(20, 120)
         self.wash_start = self.rng.randint(10, 180)
         self.wash_stage = 'idle'
+        self.fridge = fridge
+        self.fridge_age = 0
+        if fridge == 'v2':
+            # Drawn after every v1 value so v1 seeds reproduce exactly.
+            # Targets from REFIT Houses 1-4: docs/simulator-fridge-v2.md.
+            self.nominal['refrigerator'] = self.rng.uniform(80, 90)
+            self.on['refrigerator'] = self.rng.random() < .25
+            self.fridge_remaining = self.rng.randint(1, self.fridge_cycle())
 
     def sample(self, manual=None):
         rng = self.rng
@@ -35,7 +45,7 @@ class RealisticHome:
             self.fridge_remaining -= 1
             if self.fridge_remaining <= 0:
                 self.on['refrigerator'] = not self.on['refrigerator']
-                self.fridge_remaining = rng.randint(90, 360)
+                self.fridge_remaining = self.fridge_cycle() if self.fridge == 'v2' else rng.randint(90, 360)
             if self.microwave_remaining <= 0 and rng.random() < .008:
                 self.microwave_remaining = rng.randint(15, 90)
             self.on['microwave'] = self.microwave_remaining > 0
@@ -45,7 +55,13 @@ class RealisticHome:
         watts = {}
         for key, nominal in self.nominal.items():
             value = max(0, rng.gauss(nominal, nominal * .035)) if self.on[key] else 0
-            if key == 'refrigerator' and self.on[key] and not self.previous_on[key]:
+            if key == 'refrigerator' and self.fridge == 'v2':
+                if self.on[key] and not self.previous_on[key]:
+                    self.fridge_age, self.startup = 0, rng.uniform(1.1, 1.4)
+                if self.on[key] and self.fridge_age < 10:  # Mild peak over the first 10 s.
+                    value *= self.startup
+                self.fridge_age += 1
+            elif key == 'refrigerator' and self.on[key] and not self.previous_on[key]:
                 value *= rng.uniform(1.8, 2.8)
             watts[key] = round(value, 2)
         if self.washer:
@@ -69,11 +85,15 @@ class RealisticHome:
         self.second += 1
         return row
 
+    def fridge_cycle(self):
+        # 25-30 min on, 1-2 h off (seconds).
+        return self.rng.randint(1500, 1800) if self.on['refrigerator'] else self.rng.randint(3600, 7200)
 
-def realistic_sessions(seed, count, seconds=600, washer=False):
+
+def realistic_sessions(seed, count, seconds=600, washer=False, fridge='v1'):
     sessions = []
     for index in range(count):
         home = RealisticHome(seed + index * 997, washer,
-            datetime(2020, 1, 1, tzinfo=timezone.utc) + timedelta(days=index))
+            datetime(2020, 1, 1, tzinfo=timezone.utc) + timedelta(days=index), fridge)
         sessions.append([home.sample() for _ in range(seconds)])
     return sessions
