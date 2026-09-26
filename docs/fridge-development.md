@@ -114,3 +114,36 @@ it on House 2 against these v2 numbers. For example, add baseline-relative
 features that do not depend on each house's absolute load. Record every
 attempt, because repeated House 2 comparisons make it progressively less
 independent.
+
+# Fridge-only development protocol v3: background-relative features
+
+Written and committed before implementation or any v3 result.
+
+**Hypothesis.** The model relies too heavily on absolute household wattage, so
+differences in background consumption between houses hurt generalization.
+
+**Single change.** Replace the `summary` features with `relative` features. Everything
+else stays as in v2: House 1 training, House 2 development, the same 16 s thinning,
+strict timing, five-reading windows, the same three candidates, seed 42, a 20 W
+threshold and the same metrics. The House 2 windows scored are identical to v2's,
+because the background never adds a scoring requirement.
+
+**Background.** For each reading, take the minimum real aggregate watts among
+thinned readings in the trailing 30 minutes (from t − 1800 s, excluding it, up to
+and including t). It uses aggregate power and past readings only, never
+refrigerator labels or future readings. Gaps are not filled, and near the start
+of a recording less history is available.
+30 minutes is a fixed assumption, chosen so the window usually covers some
+fridge-off time. It is not tuned, and a fridge that runs for longer than 30
+minutes would raise the background.
+
+**Features** (six, the same count as `summary`, with no absolute watts):
+current − background, current − previous, window mean − background,
+window standard deviation, window max − min, and the largest absolute step
+within the window.
+
+**Decision rule.** Compare the v3 Random Forest with the committed v2 Random Forest
+(F1 0.406, accuracy 28.6%, MAE 52.6 W, 0.960 / 0.453 kWh). Report whether it
+helped, hurt or made essentially no difference, and run it once. If it fails,
+the next idea gets a new declared protocol, not a tweak to this one. House 5
+stays unscored.
