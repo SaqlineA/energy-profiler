@@ -2,6 +2,8 @@
 import hashlib
 import json
 import math
+from collections import deque
+from datetime import datetime
 
 import numpy as np
 import sklearn
@@ -15,7 +17,24 @@ from realistic import WASHER
 from sources import regular_interval, valid_interval
 
 
-def make_features(values, mode='summary'):
+def add_background(rows, seconds=1800):
+    """Copy rows with the minimum aggregate watts seen in the trailing window.
+
+    Causal and label-blind: only past/current aggregate readings are used.
+    """
+    recent, out = deque(), []
+    for row in rows:
+        t = datetime.fromisoformat(row['timestamp']).timestamp()
+        if row['total_watts'] is not None:
+            recent.append((t, row['total_watts']))
+        while recent and recent[0][0] <= t - seconds:
+            recent.popleft()
+        # ponytail: O(n) min per row; fine for 10,000 readings, use a monotonic deque if it grows.
+        out.append({**row, 'background_watts': min(w for _, w in recent) if recent else None})
+    return out
+
+
+def make_features(values, mode='summary', background=None):
     v = np.asarray(values, dtype=float)
     if len(v) < 2 or not np.isfinite(v).all():
         raise ValueError('Features require at least two finite values')
@@ -27,6 +46,11 @@ def make_features(values, mode='summary'):
         return summary
     if mode == 'history':
         return summary + v.tolist()
+    if mode == 'relative':
+        if background is None or not math.isfinite(background):
+            raise ValueError('Relative features require a finite background')
+        return [float(v[-1] - background), float(v[-1] - v[-2]), float(v.mean() - background),
+                float(v.std()), float(v.max() - v.min()), float(np.abs(np.diff(v)).max())]
     raise ValueError('Unknown feature mode')
 
 
@@ -37,13 +61,13 @@ class ResearchModel:
             raise ValueError('Fridge-only and washer experiments are separate models')
         if not math.isfinite(cadence) or not 0 < cadence <= 3600:
             raise ValueError('Cadence must be finite, positive and at most 3600 seconds')
-        if window not in (5, 10, 20, 30) or mode not in ('watts', 'summary', 'history'):
+        if window not in (5, 10, 20, 30) or mode not in ('watts', 'summary', 'history', 'relative'):
             raise ValueError('Unsupported feature configuration')
         self.mode = mode
         self.devices = (*APPLIANCES, WASHER) if washer else APPLIANCES
         if fridge_only:
             self.devices = tuple(d for d in APPLIANCES if d['id'] == 'refrigerator')
-        x, y, power = [], [], []
+        x, y, power, totals = [], [], [], []
         for session in sessions:
             history, previous = [], None
             for row in session:
@@ -52,7 +76,8 @@ class ResearchModel:
                 if row['total_watts'] is not None:
                     history = (history + [row['total_watts']])[-window:]
                 if len(history) == window and all(row.get(d['id']) is not None for d in self.devices):
-                    x.append(self.features(history))
+                    x.append(self.features(history, row))
+                    totals.append(history[-1])
                     power.append([row[d['id']] for d in self.devices])
                     y.append([int(row[d['id']] >= d['threshold']) for d in self.devices])
                 previous = row
@@ -76,7 +101,7 @@ class ResearchModel:
         # This comparator is a fixed rule, even if a device never turns off in training.
         self.classifier.fit(x, np.zeros_like(y) if algorithm == 'always_off' else y)
         self.regressor.fit(x, power)
-        self.power_bounds = (min(v[0] for v in x), max(v[0] for v in x))
+        self.power_bounds = (min(totals), max(totals))
         self.metrics = {'algorithm': algorithm, 'window': window, 'feature': mode,
                         'cadence_seconds': cadence, 'seed': seed, 'train_samples': len(x),
                         'sklearn_version': sklearn.__version__,
@@ -91,5 +116,5 @@ class ResearchModel:
                                        'training_sha256': hashlib.sha256(json.dumps(sessions, sort_keys=True).encode()).hexdigest()}}
         self.metrics['version'] = hashlib.sha256(json.dumps(self.metrics, sort_keys=True).encode()).hexdigest()[:16]
 
-    def features(self, values):
-        return make_features(values, self.mode)
+    def features(self, values, row=None):
+        return make_features(values, self.mode, row and row.get('background_watts'))

@@ -3,7 +3,7 @@ import numpy as np
 
 from experiments import evaluate_model
 from realistic import realistic_sessions
-from research_model import ResearchModel, make_features
+from research_model import ResearchModel, add_background, make_features
 
 
 class ResearchModelTests(unittest.TestCase):
@@ -48,6 +48,20 @@ class ResearchModelTests(unittest.TestCase):
         del sessions[0][9]
         model = ResearchModel(sessions, algorithm='decision_tree', cadence=8)
         self.assertEqual(model.metrics['train_samples'], (9 - 4) + (10 - 4))
+
+    def test_background_is_causal_label_blind_and_relative_features_ignore_offsets(self):
+        rows = [{'timestamp': f'2026-01-01T00:{m:02d}:00+00:00', 'total_watts': w, 'refrigerator': f}
+                for m, w, f in [(0, 300, 0), (10, 200, 0), (20, None, 0), (30, 250, 90), (45, 400, 90)]]
+        self.assertEqual([r['background_watts'] for r in add_background(rows)], [300, 200, 200, 200, 250])
+        # Labels and future readings never change earlier backgrounds.
+        changed = [{**r, 'refrigerator': 999} for r in rows[:3]] + [{**rows[3], 'total_watts': 1}]
+        self.assertEqual([r['background_watts'] for r in add_background(changed)][:3], [300, 200, 200])
+        values = [100, 150, 120, 180, 170]
+        self.assertEqual(make_features(values, 'relative', 90),
+                         make_features([v + 500 for v in values], 'relative', 590))
+        self.assertEqual(make_features(values, 'relative', 90), [80, -10, 54, np.std(values), 80, 60])
+        with self.assertRaises(ValueError):
+            make_features(values, 'relative')
 
     def test_features_are_trailing_and_window_specific(self):
         self.assertEqual(make_features([1, 2, 3, 4, 5], 'summary')[:2], [5, 1])

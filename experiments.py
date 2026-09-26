@@ -59,7 +59,6 @@ def evaluate_model(model, rows, cadence=1, policy='strict', max_gap=16, provenan
     devices = getattr(model, 'devices', APPLIANCES)
     window_size = model.metrics['window']
     required_history = max(window_size, min_history)
-    feature_fn = getattr(model, 'features', window_features)
     compatible = abs(cadence - model.metrics['cadence_seconds']) < .001
     points, features, indices, spans = [], [], [], []
     window, times, previous = [], [], None
@@ -77,7 +76,8 @@ def evaluate_model(model, rows, cadence=1, policy='strict', max_gap=16, provenan
                  'interval_seconds': dt, 'quality': 'missing' if row['total_watts'] is None else 'gap' if previous and not dt else 'valid'}
         points.append(point)
         if len(window) == required_history and (compatible or policy == 'sample_window'):
-            features.append(feature_fn(window[-window_size:]))
+            features.append(model.features(window[-window_size:], row) if hasattr(model, 'features')
+                            else window_features(window[-window_size:]))
             indices.append(index)
             spans.append(seconds_between(times[-1], times[0]))
         previous = row

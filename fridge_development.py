@@ -1,7 +1,8 @@
 """Fixed House 1 -> House 2 comparison; final-test data is never scored.
 
 v1 uses raw eight-second strict timing. v2 first thins both recordings to 16 s
-with the label-blind `thin_to_cadence` rule (see docs/fridge-development.md).
+with the label-blind `thin_to_cadence` rule. v3 is v2 with background-relative
+features. See docs/fridge-development.md.
 """
 import argparse
 import hashlib
@@ -10,14 +11,14 @@ from pathlib import Path
 
 from experiments import evaluate_model, save_experiment
 from real_data_split import verify_split
-from research_model import ResearchModel
+from research_model import ResearchModel, add_background
 from sources import parse_csv, thin_to_cadence
 
-PROTOCOLS = {'v1': 8, 'v2': 16}
+PROTOCOLS = {'v1': (8, 'summary'), 'v2': (16, 'summary'), 'v3': (16, 'relative')}
 
 
 def run_development(manifest, output, protocol='v1'):
-    cadence = PROTOCOLS[protocol]
+    cadence, mode = PROTOCOLS[protocol]
     manifest = Path(manifest)
     split = verify_split(manifest)  # Hash-only integrity check includes the reserved file.
     if (split['cadence_seconds'] != 8 or split['target'] != 'refrigerator'
@@ -32,14 +33,17 @@ def run_development(manifest, output, protocol='v1'):
         data[role] = parse_csv(content.decode('utf-8-sig'))
         if protocol != 'v1':
             data[role] = thin_to_cadence(data[role], cadence)
+        if mode == 'relative':
+            data[role] = add_background(data[role])
     reports = []
     for algorithm in ('always_off', 'decision_tree', 'random_forest'):
-        model = ResearchModel([data['training']], algorithm=algorithm, cadence=cadence,
+        model = ResearchModel([data['training']], algorithm=algorithm, cadence=cadence, mode=mode,
                               fridge_only=True, profile='REFIT House 1 training partition')
         report = evaluate_model(model, data['development'], cadence=cadence, policy='strict', provenance={
             'name': f'Fridge dev {protocol} / {algorithm} / House 2' + ('' if protocol == 'v1' else f' ({cadence}s thinned)'),
             'protocol': f'fridge-development-{protocol}', 'evaluation_role': 'development',
             'training_house': 1, 'evaluation_house': 2,
+            'features': mode if mode == 'summary' else 'relative to trailing 30 min aggregate minimum',
             'sampling': 'raw readings' if protocol == 'v1' else f'thin_to_cadence({cadence} s); no interpolation',
             'training_sha256': split['partitions']['training']['sha256'],
             'sha256': split['partitions']['development']['sha256'],
