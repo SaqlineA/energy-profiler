@@ -24,6 +24,17 @@ EXTRA_TRAINING = {
 }
 
 
+def load_house(path, digest, thin_cadence, mode):
+    """Hash-check, parse, optionally thin, and add background as the protocol requires."""
+    content = Path(path).read_bytes()
+    if hashlib.sha256(content).hexdigest() != digest:
+        raise ValueError(f'{Path(path).name} changed during loading')
+    rows = parse_csv(content.decode('utf-8-sig'))
+    if thin_cadence:
+        rows = thin_to_cadence(rows, thin_cadence)
+    return add_background(rows) if mode == 'relative' else rows
+
+
 def run_development(manifest, output, protocol='v1'):
     cadence, mode = PROTOCOLS[protocol]
     manifest = Path(manifest)
@@ -35,17 +46,8 @@ def run_development(manifest, output, protocol='v1'):
              2: (split['partitions']['development']['path'], split['partitions']['development']['sha256'])}
     if protocol.startswith('v4'):
         files.update(EXTRA_TRAINING)
-    houses = {}
-    for house, (path, digest) in files.items():
-        content = (manifest.parent / path).read_bytes()
-        if hashlib.sha256(content).hexdigest() != digest:
-            raise ValueError(f'House {house} changed during loading')
-        rows = parse_csv(content.decode('utf-8-sig'))
-        if protocol != 'v1':
-            rows = thin_to_cadence(rows, cadence)
-        if mode == 'relative':
-            rows = add_background(rows)
-        houses[house] = rows
+    houses = {house: load_house(manifest.parent / path, digest, cadence if protocol != 'v1' else None, mode)
+              for house, (path, digest) in files.items()}
     development = houses.pop(2)
     training = list(houses.values())  # One session per house: windows never cross houses.
     seen = {json.dumps(r, sort_keys=True) for r in development}
