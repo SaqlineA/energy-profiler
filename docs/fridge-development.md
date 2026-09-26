@@ -221,3 +221,77 @@ this protocol.
 **Reporting.** F1, accuracy, MAE, predicted vs measured energy, the confusion
 matrix and training support. Whatever the result, House 5 is not scored in
 Step 10, and Step 10 ends with this experiment.
+
+## v4 data preparation and inclusion check (2026-09-26)
+
+```powershell
+curl.exe -4 -L --fail --max-time 60 --range 0-1499999 --max-filesize 1500000 "https://zenodo.org/api/records/5063428/files/CLEAN_House3.csv/content" --output data/refit/house3-prefix.part
+python research/save_refit_sample.py data/refit/house3-prefix.part data/refit/house3-first-10000.csv
+python prepare_recording.py data/refit/house3-first-10000.csv data/refit/house3-replay-10000.csv --timestamp Unix --timestamp-format unix --mains Aggregate --refrigerator Appliance2 --limit 10000 --origin "REFIT House 3 fridge-freezer channel 2 (NILMTK meter 3); Zenodo 5063428; training partition v4"
+# House 4: same commands with House4 and --refrigerator Appliance1 (fridge, NILMTK meter 2).
+python fridge_development.py --protocol v4
+python fridge_development.py --protocol v4r
+```
+
+The normalized SHA-256 hashes are pinned in `fridge_development.EXTRA_TRAINING`.
+House 3 is `7a6d59ab…`, and House 4 is `e371a1c4…`. The runner also rejects
+any exact measurement shared between the training files and House 2.
+
+| House | Common intervals (s) | 16 s windows (on / off) | Fridge on W (p50) | On / off cycle (min, p50) | Household total rise at fridge switch-on (p50) |
+|---|---|---|---:|---|---:|
+| 1 | 1, 2, 13, 14 | 886 / 3,482 | 76 | 28 / 115 | 32 W |
+| 3 | 7, 6, 5 | 1,765 / 2,540 | 99 | 40 / 73 | 0 W |
+| 4 | 2, 1, 3, 12 | 799 / 2,888 | 51 | 0.4 / 10* | 0 W |
+| 2 (development) | 7, 8 | 1,256 / 2,611 | 85 | 26 / 63 | 86 W |
+
+\*House 4's small fridge often dips across the 20 W threshold, which splits its
+cycles. Its p90 on cycle is 24 min. Both new houses pass the inclusion rule,
+so no house was excluded. Houses 1, 3 and 4 all show a small household-total
+rise when their fridge switches on. House 2 is the only house where the total
+clearly tracks the fridge channel. The cause is still unexplained.
+
+## v4 result: more houses help the relative features, not the absolute ones
+
+The two declared runs were each run once. Both use the same 3,867 House 2
+windows (1,256 on / 2,611 off) and 57,744 s of energy coverage. Training has
+12,360 windows across three houses (3,450 on / 8,910 off).
+
+| Run | Features | Training houses | Model | F1 | Accuracy | MAE W | Est. / measured kWh |
+|---|---|---|---|---:|---:|---:|---|
+| v2 | summary | 1 | RF | 0.406 | 28.55% | 52.61 | 0.960 / 0.453 |
+| v4 | summary | 1, 3, 4 | RF | 0.132 | 66.02% | 28.14 | 0.108 / 0.453 |
+| v4 | summary | 1, 3, 4 | DT | 0.095 | 64.37% | 28.60 | 0.101 / 0.453 |
+| v3 | relative | 1 | RF | 0.181 | 70.70% | 21.97 | 0.143 / 0.453 |
+| v4r | relative | 1, 3, 4 | RF | 0.439 | 75.41% | 19.70 | 0.303 / 0.453 |
+| v3 | relative | 1 | DT | 0.282 | 71.53% | 19.94 | 0.174 / 0.453 |
+| v4r | relative | 1, 3, 4 | DT | **0.781** | **87.12%** | **14.76** | **0.386 / 0.453** |
+| — | — | — | Always off | 0.000 | 67.52% | 28.34 | 0 / 0.453 |
+
+**Summary features (v4 vs v2):** adding houses removed most false positives but
+left an almost always-off model. F1 is 0.13, with no better accuracy or MAE
+than always-off. Absolute-watt features still do not generalize.
+
+**Relative features (v4r vs v3):** adding houses improved every metric for both
+models. The Random Forest now finds 30% of on windows (up from 10%) with 67
+false positives. The Decision Tree finds 71% of on windows with 128 false
+positives. It is the first candidate clearly better than always-off on every
+metric, and it underestimates energy by about 15%.
+
+**Answer: yes, with background-relative features.** Training on several
+households improved generalization to House 2. With absolute watts, it did not.
+
+**Caveats:**
+- This is one development house and one seed.
+- The Decision Tree beating the Random Forest by this much (0.78 vs 0.44 F1) is
+  unexplained, and it could be seed or house luck. The tree has a shallower
+  depth and a larger minimum leaf, which may simply generalize better.
+- No window passes the uncertainty heuristic (certain_samples = 0).
+- House 2 has now been used for five comparisons, so it is development
+  evidence, not a final test.
+- House 4's extra freezer and fridge-freezer, and House 3's separate freezer,
+  are unlabeled load.
+
+No candidate was promoted, the live model is unchanged, and House 5 remains
+unscored. This concludes Step 10. Step 11 should declare its choice from this
+evidence (for example, v4r Decision Tree vs v4r Random Forest), compare it with
+the synthetic-trained system, and only then score House 5 once.
