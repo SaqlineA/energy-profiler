@@ -64,3 +64,53 @@ live model was not replaced. Next, revise the data-acquisition protocol to obtai
 a training recording with enough naturally compatible on/off windows (or explicitly
 design and validate a separate resampling policy). Preserve the v1 split and its
 failure evidence; do not silently overwrite it or relax timing to improve scores.
+
+# Fridge-only development protocol v2: label-blind 16 s thinning
+
+v1 stays as recorded above; its reports and the split-v1 recordings are unchanged.
+v2 reuses the same frozen files (hashes verified) and changes only sampling:
+`sources.thin_to_cadence` keeps the first real reading at least 12.8 s (0.8 × 16)
+after the previous kept one, skipping missing aggregates. It decides from
+timestamps only, never changes or creates values, and is then followed by the
+same strict checks (±20% intervals, reset after gaps over 24 s). Because it is
+label-blind, House 5 can later be thinned the same way without being inspected.
+
+Why 16 s: House 1 arrives in bursts (intervals of 1–2 s then 12–14 s), so almost
+no consecutive readings are 8 s apart; pairs of intervals add up to about 15 s.
+Thinned window counts were compared for 8–20 s on Houses 1 and 2 only,
+before any model was fitted. 15 and 16 s retained similar coverage, and 16 s was
+chosen as a round multiple of v1's 8 s. The House 1 on/off label counts were
+visible during that check. No model scores were used to pick the cadence.
+Thinning is instantaneous subsampling: short events between kept readings can be
+missed, and energy is integrated from fewer points.
+
+```powershell
+python fridge_development.py --protocol v2
+```
+
+## v2 result (2026-09-26): training support fixed, candidates fail on House 2
+
+Training now has 4,368 windows (886 on / 3,482 off; `training_eligible: true`).
+All candidates scored the same 3,867 House 2 windows (1,256 on / 2,611 off),
+spanning 52–70 s, with 57,744 s of matched energy coverage.
+
+| Candidate | F1 | Accuracy | MAE W | Estimated / measured kWh |
+|---|---:|---:|---:|---|
+| Always off | 0.000 | 67.52% | 28.34 | 0 / 0.4532 |
+| Decision Tree | 0.400 | 30.39% | 52.60 | 0.9487 / 0.4532 |
+| Random Forest | 0.406 | 28.55% | 52.61 | 0.9601 / 0.4532 |
+
+The learned models predict "on" most of the time in House 2 (Random Forest:
+2,452 false positives, 159 true negatives). They find about 75% of the on
+windows, but their accuracy and MAE are worse than always-off and they
+overestimate energy by about 2.1×. No window passes the uncertainty heuristic.
+So the data blocker is solved, but a House 1 model does not transfer to House 2
+with raw-watt summary features. A likely cause is the difference in background
+load between houses. This is a hypothesis, not a finding.
+No candidate is selected or promoted; House 5 remains unscored.
+
+Next (still development-only): declare one fixed change in advance and compare
+it on House 2 against these v2 numbers. For example, add baseline-relative
+features that do not depend on each house's absolute load. Record every
+attempt, because repeated House 2 comparisons make it progressively less
+independent.

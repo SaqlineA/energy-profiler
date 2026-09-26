@@ -73,3 +73,16 @@ def valid_interval(current, previous, cadence):
 def regular_interval(current, previous, cadence):
     """Feature windows require cadence within 20%; energy can use shorter intervals."""
     return previous is not None and abs(seconds_between(current, previous) - cadence) <= cadence * .2
+
+
+def thin_to_cadence(rows, cadence):
+    """Keep the first real reading at least 0.8x cadence after the last kept one.
+
+    Label-blind: decides from timestamps and aggregate presence only. Values are
+    never changed or created, so gaps stay gaps and strict checks still apply.
+    """
+    kept = []
+    for row in rows:
+        if row["total_watts"] is not None and (not kept or seconds_between(row, kept[-1]) >= cadence * .8):
+            kept.append(row)
+    return kept
