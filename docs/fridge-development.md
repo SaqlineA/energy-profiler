@@ -180,3 +180,44 @@ transfers between houses. Possible reasons, all untested: the fridges differ in
 power and cycle pattern, a 30-minute minimum is sometimes a poor background, or
 64-second windows at 16 s rarely capture a clear switch-on step. v3 is not
 adjusted further. House 5 remains unscored.
+
+# Fridge-only development protocol v4: multi-house training
+
+Written and committed before Houses 3 and 4 were downloaded or inspected.
+
+**Question.** Does training on several households improve cross-house
+generalization to House 2?
+
+**Data.**
+- **Training:** the frozen House 1 slice from split-v1, plus the first 10,000
+  cleaned readings of REFIT House 3 and House 4, downloaded as byte-range
+  prefixes in the same way as Houses 1, 2 and 5.
+- **Development:** House 2 only.
+- **House 5:** stays reserved. Its hash is checked, but it is never parsed or scored.
+- **Fridge channels,** from NILMTK REFIT metadata (NILMTK meter N = REFIT
+  Appliance(N−1)): House 3 uses Appliance2 (fridge-freezer) and House 4 uses
+  Appliance1 (fridge).
+- **Known confound:** House 3 also has a separate freezer (Appliance3). House 4
+  also has a freezer (Appliance2) and a fridge-freezer (Appliance3). Their cycles
+  appear in the household total without a label, so they may look like
+  "unexplained" fridge-like load.
+- **Houses stay separate.** Each house is its own training session, so a feature
+  window never crosses from one house into another.
+
+**Fixed settings.** v2 thinning (16 s), strict timing, five-reading windows, the
+always-off / Decision Tree / Random Forest candidates unchanged, seed 42, a 20 W
+threshold, and the same metrics. Two runs are declared in advance, with no others:
+- v4 (summary features): compared with v2.
+- v4r (relative features): compared with v3.
+
+Together these show whether adding houses helps with either feature set.
+
+**Inclusion check before training.** This is the same timing and fridge-profile
+inspection used earlier. A new house is included only if its thinned 16 s data
+yields at least 100 fridge-on and 100 fridge-off training windows. A house that
+fails is documented and excluded; it is not swapped for another house under
+this protocol.
+
+**Reporting.** F1, accuracy, MAE, predicted vs measured energy, the confusion
+matrix and training support. Whatever the result, House 5 is not scored in
+Step 10, and Step 10 ends with this experiment.
