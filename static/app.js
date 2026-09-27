@@ -65,6 +65,7 @@ function buildCards(devices) {
     .map(
       (d) => `
     <article class="appliance-card">
+      <img class="device-art" src="/static/img/${d.id}.webp" alt="" onerror="this.hidden = true">
       <div class="device-top"><span class="device-icon"><svg viewBox="0 0 24 24" aria-hidden="true">${icons[d.id]}</svg></span><button class="toggle" id="toggle-${d.id}" role="switch" aria-checked="false" aria-label="Toggle ${d.name}"></button></div>
       <h3 class="device-name">${d.name}</h3><div class="device-description" id="description-${d.id}">Measured / estimated power</div>
       <div class="device-power"><strong><span id="watts-${d.id}">—</span><small>W</small></strong><span id="energy-${d.id}">0 Wh</span></div>

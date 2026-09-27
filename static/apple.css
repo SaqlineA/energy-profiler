@@ -1,0 +1,135 @@
+/* Apple.com-style presentation layer, loaded last. Styling only: markup, data and
+   behaviour stay in index.html / app.js. Remove this file to return to fluid.css. */
+:root {
+  --ink: #1d1d1f;
+  --muted: #6e6e73;
+  --paper: #f5f5f7;
+  --white: #ffffff;
+  --green: #0b7a4b;
+  --green-deep: #06552f;
+  --lime: #e3f4ea;
+  --line: #e5e5ea;
+  --fill: #e8e8ed;
+  --glass: rgba(245, 245, 247, .78);
+  --radius: 28px;
+  --shadow: 0 1px 2px rgba(0, 0, 0, .04), 0 12px 32px rgba(0, 0, 0, .06);
+  --shadow-lift: 0 2px 4px rgba(0, 0, 0, .05), 0 20px 44px rgba(0, 0, 0, .09);
+  --font: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', 'Segoe UI', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+body { background: var(--paper); color: var(--ink); letter-spacing: -.011em; }
+
+/* Navigation: quiet, translucent, content-first. */
+.sidebar { background: var(--glass); border-right: 1px solid rgba(0, 0, 0, .06); }
+.nav-item { border-radius: 12px; font-weight: 500; }
+.nav-item:hover, .nav-item:focus-visible { background: rgba(0, 0, 0, .05); color: var(--ink); }
+.brand-mark, .avatar { background: linear-gradient(145deg, #13a86a, var(--green-deep)); }
+.side-note { background: var(--white); border: 0; box-shadow: var(--shadow); border-radius: 22px; }
+.topbar { background: var(--glass); border-bottom: 1px solid rgba(0, 0, 0, .06); }
+.content { max-width: 1320px; padding-inline: clamp(16px, 3vw, 40px); }
+
+/* Hero: one big idea, big type, an image with room to breathe. */
+.page-heading.hero {
+  position: relative; overflow: hidden; isolation: isolate;
+  display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, .9fr); align-items: center; gap: 24px;
+  min-height: 360px; margin-bottom: 28px; padding: clamp(28px, 5vw, 64px);
+  border-radius: 36px; background: var(--white); box-shadow: var(--shadow);
+}
+.hero-art {
+  position: absolute; inset: 0 0 0 42%; z-index: -1;
+  background: url('/static/img/hero.webp') center / cover no-repeat,
+              radial-gradient(120% 90% at 70% 40%, #d8f3e4 0%, #eef8f2 38%, var(--white) 70%);
+  -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 30%);
+          mask-image: linear-gradient(90deg, transparent 0%, #000 30%);
+}
+.page-heading.hero .eyebrow { color: var(--green); font-weight: 600; letter-spacing: .02em; font-size: .8125rem; }
+.page-heading.hero h1 {
+  margin: 10px 0 14px; font-size: clamp(2.6rem, 6vw, 5rem); font-weight: 700; letter-spacing: -.045em; line-height: 1.02;
+}
+.page-heading.hero h1 em {
+  font-style: normal;
+  background: linear-gradient(100deg, #0b7a4b 10%, #17b26a 55%, #0a8f8a 95%);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+.page-heading.hero p { font-size: clamp(1.05rem, 1.6vw, 1.3rem); line-height: 1.45; color: var(--muted); max-width: 30rem; }
+.hero-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 26px; }
+
+/* Surfaces: borderless white cards with soft depth. */
+.panel, .stat, .appliance-card, .result-summary, .source-panel {
+  border: 0; border-radius: var(--radius); background: var(--white); box-shadow: var(--shadow);
+}
+.result-summary { background: var(--paper); box-shadow: none; }
+.panel, .stat, .appliance-card { transition: box-shadow 220ms ease, transform 220ms ease; }
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .stat:hover, .appliance-card:hover { box-shadow: var(--shadow-lift); transform: translateY(-2px); }
+}
+.panel-heading h2, .section-heading h2 { font-size: clamp(1.4rem, 2.2vw, 1.9rem); font-weight: 700; letter-spacing: -.03em; }
+.chart-title { font-size: 1.0625rem; font-weight: 650; letter-spacing: -.015em; }
+
+/* Bento stats: large numbers, hero tile in brand green. */
+.stats { gap: 16px; }
+.stat { padding: 24px 26px; }
+.stat-number { font-size: clamp(2.2rem, 3.4vw, 3rem); font-weight: 700; letter-spacing: -.05em; }
+.stat.primary { background: linear-gradient(150deg, #13a86a 0%, var(--green) 45%, var(--green-deep) 100%); box-shadow: 0 16px 40px rgba(11, 122, 75, .28); }
+.stat-label { font-weight: 600; }
+
+/* Controls: Apple-style pills and segmented controls. */
+.button { border: 0; border-radius: 980px; font-weight: 600; font-size: .9375rem; min-height: 44px; padding: 11px 22px; }
+.dark, .button.primary { background: var(--green); color: #fff; }
+.dark:hover, .button.primary:hover { background: var(--green-deep); }
+.secondary { background: var(--fill); color: var(--ink); border: 0; }
+.secondary:hover { background: #dcdce1; }
+.journey, .mode-switch { background: var(--fill); border: 0; padding: 3px; }
+.journey a, .mode-switch button { color: var(--ink); font-weight: 500; }
+.journey a:hover, .journey a:focus-visible { background: rgba(255, 255, 255, .7); color: var(--ink); }
+.mode-switch button[aria-pressed=true] { background: var(--white); box-shadow: 0 1px 3px rgba(0, 0, 0, .12), 0 3px 8px rgba(0, 0, 0, .06); }
+select, input { border: 0; background-color: var(--fill); border-radius: 12px; color: var(--ink); }
+.research-panel .source-controls { background: var(--paper); border: 0; }
+.pill, .model-badge, .device-icon, .per-device span { background: var(--lime); color: var(--green); }
+
+/* Appliance cards: illustration first, like a product tile. */
+.appliance-card { padding: 22px; }
+.device-art { display: block; width: 100%; aspect-ratio: 16 / 10; object-fit: contain; margin: 4px 0 10px; border-radius: 18px; background: var(--paper); }
+.device-art[hidden] { display: none; }
+.washer-card { padding: 26px; }
+.washer-card > strong { font-size: 2rem; letter-spacing: -.04em; }
+
+/* Evidence stays calm: charts on white, tables with hairlines. */
+.research-chart, #comparison-chart { border-radius: 18px; box-shadow: inset 0 0 0 1px var(--line); }
+.metrics-table th { background: var(--paper); font-weight: 600; }
+.data-badge.real { background: var(--green); }
+.data-badge.synthetic { background: #6e3fa3; }
+
+@media (max-width: 900px) {
+  .page-heading.hero { grid-template-columns: 1fr; min-height: 0; padding-bottom: 220px; }
+  .hero-art { inset: auto 0 0 0; height: 240px; -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 35%); mask-image: linear-gradient(180deg, transparent 0%, #000 35%); }
+}
+@media (max-width: 700px) {
+  .page-heading.hero { border-radius: 26px; }
+  .panel, .stat, .appliance-card { border-radius: 22px; }
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --ink: #f5f5f7; --muted: #a1a1a6; --paper: #000000; --white: #1c1c1e; --green: #30d158; --green-deep: #0b7a4b;
+    --lime: #1e3a2a; --line: #38383a; --fill: #2c2c2e; --glass: rgba(22, 22, 23, .78);
+    --shadow: 0 1px 2px rgba(0, 0, 0, .4), 0 12px 32px rgba(0, 0, 0, .35);
+    --shadow-lift: 0 2px 4px rgba(0, 0, 0, .5), 0 20px 44px rgba(0, 0, 0, .45);
+  }
+  .hero-art { background: url('/static/img/hero.webp') center / cover no-repeat, radial-gradient(120% 90% at 70% 40%, #0f3b27 0%, #0b1f16 45%, var(--white) 75%); }
+  .stat.primary, .dark, .button.primary { background: linear-gradient(150deg, #1f9d5c, #0b7a4b 60%, #06552f); color: #fff; }
+  .secondary:hover { background: #3a3a3c; }
+  .mode-switch button[aria-pressed=true] { background: #636366; color: #fff; }
+  .journey a:hover, .journey a:focus-visible { background: #3a3a3c; }
+  .pill, .model-badge, .device-icon, .per-device span { color: #7ee2a8; }
+  .data-badge.real { background: #1f7a4a; }
+  .data-badge.synthetic { background: #7d52a3; }
+}
+@media (prefers-reduced-transparency: reduce), (prefers-contrast: more) {
+  .sidebar, .topbar { background: var(--paper); }
+  .panel, .stat, .appliance-card { box-shadow: none; outline: 1px solid var(--line); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .stat:hover, .appliance-card:hover { transform: none; }
+}
+.hero-actions .button { min-height: 48px; padding: 12px 24px; display: inline-flex; align-items: center; gap: 6px; }
