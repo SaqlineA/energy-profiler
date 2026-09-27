@@ -21,11 +21,11 @@ class WasherV2:
                  'pause': (60, 300), 'drain': (60, 180), 'spin': (180, 600)}
     NOISE = {'fill': .05, 'heat': .02, 'wash': .05, 'drain': .05, 'spin': .05}
 
-    def __init__(self, seed):
+    def __init__(self, seed, first_start=(120, 600)):
         self.rng = random.Random(f'washer-v2-{seed}')
         self.heater = self.rng.uniform(2000, 2500)
-        # Demo convenience: the first cycle starts 2-10 min into a session.
-        self.stage, self.remaining, self.cycle_seconds = 'off', self.rng.randint(120, 600), None
+        # Default is a demo convenience: the first cycle starts 2-10 min into a session.
+        self.stage, self.remaining, self.cycle_seconds = 'off', self.rng.randint(*first_start), None
 
     def enter(self, stage):
         rng = self.rng
@@ -99,7 +99,8 @@ class BackgroundV2:
 
 
 class RealisticHome:
-    def __init__(self, seed=42, washer=False, start=None, fridge='v1', microwave='v1', background='v1'):
+    def __init__(self, seed=42, washer=False, start=None, fridge='v1', microwave='v1', background='v1',
+                 washer_first_start=(120, 600)):
         if fridge not in ('v1', 'v2'):
             raise ValueError('Unknown fridge model')
         if background not in ('v1', 'v2'):
@@ -130,7 +131,7 @@ class RealisticHome:
             self.nominal['refrigerator'] = self.rng.uniform(80, 90)
             self.on['refrigerator'] = self.rng.random() < .25
             self.fridge_remaining = self.rng.randint(1, self.fridge_cycle())
-        self.washer_v2 = WasherV2(seed) if washer == 'v2' else None
+        self.washer_v2 = WasherV2(seed, washer_first_start) if washer == 'v2' else None
         self.background_v2 = BackgroundV2(seed) if background == 'v2' else None
         self.microwave = microwave
         if microwave == 'v2':
@@ -202,10 +203,11 @@ class RealisticHome:
         return self.rng.randint(1500, 1800) if self.on['refrigerator'] else self.rng.randint(3600, 7200)
 
 
-def realistic_sessions(seed, count, seconds=600, washer=False, fridge='v1', microwave='v1', background='v1'):
+def realistic_sessions(seed, count, seconds=600, washer=False, fridge='v1', microwave='v1', background='v1',
+                       washer_first_start=(120, 600)):
     sessions = []
     for index in range(count):
         home = RealisticHome(seed + index * 997, washer,
-            datetime(2020, 1, 1, tzinfo=timezone.utc) + timedelta(days=index), fridge, microwave, background)
+            datetime(2020, 1, 1, tzinfo=timezone.utc) + timedelta(days=index), fridge, microwave, background, washer_first_start)
         sessions.append([home.sample() for _ in range(seconds)])
     return sessions

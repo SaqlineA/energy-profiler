@@ -56,17 +56,20 @@ def make_features(values, mode='summary', background=None):
 
 class ResearchModel:
     def __init__(self, sessions, window=5, mode='summary', algorithm='random_forest',
-                 washer=False, seed=42, profile='realistic', cadence=1, fridge_only=False):
+                 washer=False, seed=42, profile='realistic', cadence=1, fridge_only=False, target=None):
         if fridge_only and washer:
             raise ValueError('Fridge-only and washer experiments are separate models')
+        target = 'refrigerator' if fridge_only else target  # One-output model for a single appliance.
         if not math.isfinite(cadence) or not 0 < cadence <= 3600:
             raise ValueError('Cadence must be finite, positive and at most 3600 seconds')
         if window not in (5, 10, 20, 30) or mode not in ('watts', 'summary', 'history', 'relative'):
             raise ValueError('Unsupported feature configuration')
         self.mode = mode
         self.devices = (*APPLIANCES, WASHER) if washer else APPLIANCES
-        if fridge_only:
-            self.devices = tuple(d for d in APPLIANCES if d['id'] == 'refrigerator')
+        if target:
+            self.devices = tuple(d for d in (*APPLIANCES, WASHER) if d['id'] == target)
+            if not self.devices:
+                raise ValueError('Unknown target appliance')
         x, y, power, totals = [], [], [], []
         for session in sessions:
             history, previous = [], None
@@ -94,7 +97,7 @@ class ResearchModel:
             self.regressor = DummyRegressor(strategy='constant', constant=[0] * len(self.devices))
         else:
             raise ValueError('Unknown algorithm')
-        if fridge_only:
+        if target:
             # Keep the evaluator's (samples, devices) shape even with one output.
             self.classifier = MultiOutputClassifier(self.classifier)
             self.regressor = MultiOutputRegressor(self.regressor)
