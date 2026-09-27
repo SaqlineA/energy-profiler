@@ -45,7 +45,8 @@ python washer_profile.py
 | Cycle length, min p50 (p10–p90) | 32 (32–74) | 140 (91–172) | 65 (60–68) | 47 (45–54) | 111 |
 | Peak W, p50 | 2,427 | 2,327 | 2,046 | 2,620 | 143 |
 | Cycles with heating (>1 kW) | 13/13 | 14/15 | 5/5 | 5/5 | 0 |
-| Heating minutes, p50 | 10 | 18 | 18 | 16 | 0 |
+| Heat-band stage minutes, p50 | 10 | 18 | 18 | 16 | 0 |
+| Minutes above 1 kW (direct), p50 | 6.0 | 17.3 | 13.6 | 14.7 | 0 |
 | Energy per cycle, kWh p50 | 0.3 | 0.9 | 0.5 | 0.6 | 0.2 |
 | Off/idle W, p50 | 0 | 0 | 0 | 0 | 5 |
 | Non-heating active W, p10 / p50 / p90 / p99 | 26 / 128 / 355 / 549 | 19 / 110 / 221 / 332 | 18 / 136 / 235 / 568 | 46 / 68 / 392 / 442 | — |

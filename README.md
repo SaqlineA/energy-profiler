@@ -21,6 +21,7 @@ Later milestones are documented in:
   models.
 - [Simulator fridge v2](docs/simulator-fridge-v2.md).
 - [Experiment visualization](docs/experiment-visualization.md): how to read the dashboard charts.
+- [Washing machine](docs/washing-machine-profile.md): the real REFIT profile, and the [simulator v2 design and results](docs/washing-machine-design.md).
 
 To inspect any saved result, open **Experiments** in the dashboard and pick a
 report. The page then shows:

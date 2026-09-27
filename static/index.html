@@ -174,6 +174,7 @@
                 <option value="classic">Original three-appliance demo</option>
                 <option value="realistic">Realistic cycles + background + noise</option>
                 <option value="expanded">Realistic + experimental washer</option>
+                <option value="household">Realistic v2: real-data fridge + washing machine</option>
               </select>
             </label>
             <p id="mode-description" class="mode-description">
@@ -218,6 +219,16 @@
             <span class="pill">3 modeled appliances</span>
           </div>
           <div class="appliance-grid" id="appliance-cards"></div>
+          <article id="washer-card" class="panel washer-card" hidden aria-live="polite">
+            <div class="eyebrow">WASHING MACHINE · SIMULATED, NOT ML-DETECTED</div>
+            <strong id="washer-state">Off</strong>
+            <dl class="result-facts">
+              <div><dt>Phase</dt><dd id="washer-phase">—</dd></div>
+              <div><dt>Measured</dt><dd id="washer-watts">—</dd></div>
+              <div><dt>Cycle time</dt><dd id="washer-minutes">—</dd></div>
+              <div><dt>Model</dt><dd id="washer-model">—</dd></div>
+            </dl>
+          </article>
         </section>
 
         <section class="panel research-panel" id="research" aria-labelledby="research-heading">

@@ -90,3 +90,92 @@ real data. v2 passes if all of these hold:
   startup surges and load-dependent variation.
 - There is no washer-dryer, no standby display load, and no link between the
   washer schedule and time of day.
+
+## Implementation and results (Step 15C–15F, 2026-09-26)
+
+`WasherV2` in `realistic.py` follows the design above. The four existing modes
+(no washer, v1 washer, fridge v2, and v1 washer with fridge v2) were verified
+byte-identical to the previous code, and their fingerprints are pinned in
+`test_realistic.py`.
+
+### Acceptance checks
+
+Two homes (seeds 42 and 1039) were each simulated for 14 days and profiled
+with `washer_profile.profile`.
+
+**First run (as designed): two of the preregistered checks failed.**
+
+- **The heat-band check failed (50–58 min, target 5–18).** This is a
+  profiler flaw, not a simulator one. `stages()` folds any band shorter than
+  60 s into the stage before it. The simulated wash stage's 8–15 s drum bursts
+  were therefore counted as part of the heating stage that precedes them.
+  The simulator's heat stage itself is 8–18 min by construction. A direct
+  measure, *minutes above 1 kW*, was added to the profiler and run on both
+  real and simulated data. Real p50 values are 6.0, 17.3, 13.6 and 14.7 min;
+  the simulator gives 13–14 min.
+- **The non-heating active watts check failed (p50 180 W, target 60–140 W).**
+  This was a real calibration miss: the wash bursts were too strong.
+  **One revision** was made: wash bursts went from 100–250 W to **40–200 W**.
+
+**After that single revision, every check passes:**
+
+| Check | Target | Seed 42 | Seed 1039 |
+|---|---|---:|---:|
+| Cycle length p50 | 30–140 min | 74.6 | 66.9 |
+| Peak p50 | 1,900–2,700 W | 2,045 | 2,476 |
+| Heating in every cycle | yes | 4/4 | 4/4 |
+| Minutes above 1 kW, p50 | 5–18 (real 6–17) | 14.3 | 12.8 |
+| Energy per cycle p50 | 0.3–0.9 kWh | 0.6 | 0.6 |
+| Idle power p50 | 0 W | 0 | 0 |
+| Cycles per day | 0.15–0.65 | 0.29 | 0.29 |
+| Non-heating active W, p50 / p99 | 60–140 / ≤600 | 127 / 562 | 130 / 395 |
+
+The preregistered heat-band measure still reads high because of the flaw
+described above. It is left unchanged, and the direct measure is reported
+alongside it.
+
+### Tests (15D)
+
+- The stages run in exactly `off → fill → heat → wash → pause → drain → spin → off`,
+  and every transition is in `WASHER_V2_NEXT`, so a jump like `off → spin` is
+  impossible.
+- Every sample's watts stay inside its stage's bounds, since the noise is bounded.
+- The lamp, fridge and microwave values are identical with and without the washer.
+- The household total with the washer equals the total without it plus the
+  washer's watts, to within 0.01 W of rounding.
+- The cycle timer resets when a cycle finishes.
+- In the app, the `household` profile runs washer v2, and `/api/state` reports
+  its stage, model and cycle minutes.
+- The CSV export includes `washing_machine_stage`, from `off` through to the
+  live stage.
+
+### Dashboard (15E)
+
+- A new profile, **Realistic v2: real-data fridge + washing machine**, has its
+  own description.
+- In the Appliances section, a washer card shows running or off, the phase, the
+  measured watts, the minutes into the cycle and the model version. It is
+  labelled *simulated, not ML-detected*.
+- Live check: at 179 s into a session it showed Running · Fill · 12 W · 0.2 min.
+- The *expanded* profile keeps the v1 washer, and the card says "v1 · compressed demo".
+
+### Is the pattern recognizable in the household total? (15F)
+
+![Simulated homes vs real House 3 around a wash cycle](img/washer-v2-aggregate.png)
+
+- **Heating is the signature.** It is a 2.0–2.5 kW block lasting 10–15
+  minutes and carries **79–84% of the washer's energy**. It stands out clearly
+  in the simulated total, as it does in real House 3.
+- **The final spin is visible** as a steady rise to 300–550 W.
+- **Fill, wash and drain (below 200 W) are nearly invisible** under the other
+  loads, in both the simulation and real House 3. Detecting those phases from
+  the household total will be much harder than detecting heating.
+- **New finding: the research simulator's microwave is unrealistic.** It
+  starts a 700–1,500 W burst roughly every 2 minutes (0.8% per second), which
+  crowds the total and could hide or mimic washer stages. It is recorded here
+  and **not changed**, to keep one variable at a time, but it should be fixed
+  before a washer ML experiment.
+- The simulated background load (about 50–120 W) is lower than real House 3's
+  (about 400 W).
+
+No ML detection was added. A separate, preregistered washer experiment comes next.

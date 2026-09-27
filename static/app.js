@@ -128,7 +128,7 @@ function render() {
   $("auto").setAttribute("aria-pressed", state.mode === "auto");
   $("manual").setAttribute("aria-pressed", state.mode === "manual");
   $("mode-description").textContent =
-    state.source === 'sensor' ? 'Waiting for POST /api/sensor/readings. Loopback only; no physical hardware has been verified.' : state.source === 'replay' ? 'Replay preserves source time. Gaps are not counted as zero consumption. Appliance switches are disabled.' : state.profile !== 'classic' ? 'Seeded cycles, varying wattage, startup spikes, unknown background and measurement noise. Washer stages are compressed demo timings.' : state.mode === "auto"
+    state.source === 'sensor' ? 'Waiting for POST /api/sensor/readings. Loopback only; no physical hardware has been verified.' : state.source === 'replay' ? 'Replay preserves source time. Gaps are not counted as zero consumption. Appliance switches are disabled.' : state.profile === 'household' ? 'Fridge and washing machine timings follow real REFIT homes: the fridge runs 25-30 min, and a full wash (fill, heat, wash, pause, drain, spin) takes about an hour. The first wash starts within 10 minutes; later ones days apart.' : state.profile !== 'classic' ? 'Seeded cycles, varying wattage, startup spikes, unknown background and measurement noise. Washer stages are compressed demo timings.' : state.mode === "auto"
       ? "The lamp stays on. The refrigerator cycles, and the microwave runs in short bursts."
       : "Use the appliance switches below. Try combining loads to see when the model gets confused.";
   if (!tariffInitialized) {

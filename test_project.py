@@ -48,6 +48,21 @@ class ProjectTests(unittest.TestCase):
         self.model_patch.stop()
         self.temp.cleanup()
 
+    def test_household_profile_runs_saves_and_exports_washer_v2(self):
+        self.assertEqual(self.client.post('/api/simulation', json={'profile': 'household'}).status_code, 200)
+        self.assertEqual(self.profiler.realistic_home.washer, 'v2')
+        for _ in range(700):  # The first v2 cycle starts 2-10 minutes in.
+            self.profiler.sample()
+        washer = self.client.get('/api/state').json()['experimental_washer']
+        self.assertEqual(washer['model'], 'v2')
+        self.assertNotIn(washer['stage'], ('off', 'idle'))
+        self.assertGreater(washer['cycle_minutes'], 0)
+        exported = list(csv.DictReader(io.StringIO(self.client.get('/api/export.csv').text)))
+        stages = [row['washing_machine_stage'] for row in exported]
+        self.assertEqual(stages[0], 'off')
+        self.assertEqual(stages[-1], washer['stage'])
+        self.assertAlmostEqual(float(exported[-1]['washing_machine']), washer['watts'])
+
     def test_original_appliance_still_works(self):
         lamp = Appliance('Lamp', 10)
         self.assertEqual(lamp.read_power(), 0)

@@ -95,13 +95,15 @@ def profile(readings):
         energy = sum((a[1] + b[1]) / 2 * (b[0] - a[0]) for a, b in zip(c, c[1:])
                      if b[0] - a[0] <= MAX_INTERVAL_S) / 3.6e6
         steps = [abs(b[1] - a[1]) for a, b in zip(c, c[1:])]
+        # Direct time above 1 kW; band stages can absorb short bursts into a neighbouring stage.
+        heat_s = sum(b[0] - a[0] for a, b in zip(c, c[1:]) if a[1] >= 1000 and b[0] - a[0] <= MAX_INTERVAL_S)
         seq = stages(c)
         time_in = {name: sum(e - s for n, s, e in seq if n == name) / 60 for _, name in BANDS}
         rows.append({'minutes': round((c[-1][0] - c[0][0]) / 60, 1), 'peak_w': max(w for _, w in c),
                      'median_active_w': median(w for _, w in c if w > ACTIVE_W), 'kwh': round(energy, 3),
                      'stages': len(seq), 'sequence': ' > '.join(n for n, _, _ in seq),
                      'minutes_by_band': {k: round(v, 1) for k, v in time_in.items()},
-                     'median_step_w': median(steps), 'max_step_w': max(steps)})
+                     'median_step_w': median(steps), 'max_step_w': max(steps), 'heat_minutes': heat_s / 60})
     key = lambda k: [r[k] for r in rows]
     return {
         'days': round(span_days, 1), 'cycles': len(rows),
@@ -113,6 +115,7 @@ def profile(readings):
         'kwh_per_cycle_p50': pct(key('kwh'), .5),
         'stages_p10_p50_p90': [pct(key('stages'), q) for q in (.1, .5, .9)],
         'heating_cycles': sum(r['minutes_by_band']['heat'] > 0 for r in rows),
+        'heat_minutes_above_1kw_p10_p50_p90': [pct(key('heat_minutes'), q) for q in (.1, .5, .9)],
         'minutes_by_band_p50': {name: pct([r['minutes_by_band'][name] for r in rows], .5) for _, name in BANDS},
         'median_step_w_p50': pct(key('median_step_w'), .5), 'max_step_w_p50': pct(key('max_step_w'), .5),
         'examples': [r['sequence'] for r in rows[:3]],
