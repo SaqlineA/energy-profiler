@@ -81,6 +81,8 @@ details, .event-body small, .event-delta, .empty-event, .page-footer { color: va
 .result-facts dd { margin: 2px 0 0; font-size: 1rem; font-weight: 600; color: var(--ink); overflow-wrap: anywhere; font-variant-numeric: tabular-nums; }
 .result-explanation { margin: 14px 0 0; line-height: 1.6; color: var(--ink); max-width: 60rem; }
 .swatch-key span::before { content: none; }
+.washer-card { margin-top: 16px; padding: 20px; }
+.washer-card > strong { display: block; margin: 6px 0 14px; font-size: 1.5rem; font-weight: 650; color: var(--ink); }
 .swatch { display: inline-block; width: 12px; height: 12px; margin-right: 6px; border-radius: 3px; vertical-align: -1px; }
 .swatch.actual { background: #426635; } .swatch.predicted { background: #995127; }
 .swatch.over { background: #b0561f; } .swatch.under { background: #2f5f8a; }

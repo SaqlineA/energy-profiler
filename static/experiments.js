@@ -209,6 +209,13 @@
     current = next; live = rows;
     $('simulation-profile').value = next.profile;
     const washer = next.experimental_washer;
+    const running = washer?.stage && !['off', 'idle'].includes(washer.stage);
+    $('washer-card').hidden = !washer?.model;
+    $('washer-state').textContent = running ? 'Running' : 'Off';
+    $('washer-phase').textContent = running ? washer.stage[0].toUpperCase() + washer.stage.slice(1) : '—';
+    $('washer-watts').textContent = washer?.watts == null ? '—' : `${number(washer.watts, 0)} W`;
+    $('washer-minutes').textContent = washer?.cycle_minutes == null ? '—' : `${number(washer.cycle_minutes, 1)} min`;
+    $('washer-model').textContent = washer?.model === 'v2' ? 'v2 · based on REFIT cycles' : 'v1 · compressed demo';
     $('washer-status').textContent = `Experimental washer: ${number(washer?.watts)} W · Stage ${washer?.stage || 'unknown'} · ${number(washer?.energy_kwh == null ? null : washer.energy_kwh * 1000)} Wh. Original live model has no washer output; see the four-device experiment for estimates.`;
     renderControls(); if (!selected) draw();
   }};

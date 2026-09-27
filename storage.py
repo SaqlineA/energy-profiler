@@ -53,6 +53,8 @@ class Store:
                 db.execute('ALTER TABLE readings_v2 ADD COLUMN source_id TEXT')
             if 'washing_machine' not in columns:
                 db.execute('ALTER TABLE readings_v2 ADD COLUMN washing_machine REAL')
+            if 'washing_machine_stage' not in columns:
+                db.execute('ALTER TABLE readings_v2 ADD COLUMN washing_machine_stage TEXT')
 
     def connect(self):
         # Streaming responses may resume on different worker threads, serially.

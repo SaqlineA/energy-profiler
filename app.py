@@ -39,7 +39,7 @@ ROOT = Path(__file__).resolve().parent
 class SimulationSettings(BaseModel):
     running: bool | None = None
     mode: Literal["auto", "manual"] | None = None
-    profile: Literal['classic', 'realistic', 'expanded'] | None = None
+    profile: Literal['classic', 'realistic', 'expanded', 'household'] | None = None
 
 
 class ApplianceSettings(BaseModel):
@@ -118,7 +118,9 @@ class EnergyProfiler:
         self.transitions = TransitionTracker()
         self.correct_predictions = self.evaluated = self.predicted_count = self.peak_watts = 0
         self.started_at = datetime.now(timezone.utc)
-        self.realistic_home = RealisticHome(washer=self.profile == 'expanded', start=self.started_at)
+        # expanded keeps the compressed v1 washer; household is the real-data-based demo (fridge v2 + washer v2).
+        self.realistic_home = RealisticHome(washer={'expanded': 'v1', 'household': 'v2'}.get(self.profile, False),
+                                            start=self.started_at, fridge='v2' if self.profile == 'household' else 'v1')
         self.washer_energy = self.washer_coverage = 0.0
         self.running, self.error = True, None
 
@@ -186,6 +188,7 @@ class EnergyProfiler:
         reading = {
             "session": self.session, **raw, "second": elapsed,
             "washing_machine": raw.get('washing_machine'),
+            "washing_machine_stage": raw.get('washing_machine_stage'),
             "actual_mask": actual, **result, "energy_kwh": next_energy,
             "source": self.source, "source_id": self.replay_provenance.get('sha256') if self.source == 'replay' else
                 'local-sensor' if self.source == 'sensor' else f'simulator-{self.profile}',
@@ -229,7 +232,11 @@ class EnergyProfiler:
             "profile": self.profile,
             "experimental_washer": {'watts': self.latest.get('washing_machine') if self.latest else None,
                 'energy_kwh': self.washer_energy if self.washer_coverage else None,
-                'stage': self.realistic_home.wash_stage if self.source == 'simulator' and self.profile == 'expanded' else None,
+                'stage': self.realistic_home.wash_stage if self.source == 'simulator' and self.realistic_home.washer else None,
+                'model': self.realistic_home.washer if self.source == 'simulator' else None,
+                'cycle_minutes': (self.realistic_home.washer_v2.cycle_seconds / 60
+                                  if self.source == 'simulator' and self.realistic_home.washer_v2
+                                  and self.realistic_home.washer_v2.cycle_seconds is not None else None),
                 'note': 'Measured/simulated extra load; original live model has no washer output'},
             "rate": self.rate, "samples": self.second, "energy_kwh": self.energy_kwh,
             "cost": self.energy_kwh * self.rate, "latest": self.latest,
@@ -475,7 +482,7 @@ def create_app(data_dir=None, ticking=True):
             columns = ["id", "session", "timestamp", "second", "total_watts", "lamp",
                        "refrigerator", "microwave", "actual_mask", "predicted_mask",
                        "confidence", "energy_kwh", "source", "quality", "prediction_quality",
-                       "interval_seconds", "model_version", "source_id", "unexplained_watts", "predictions", "washing_machine"]
+                       "interval_seconds", "model_version", "source_id", "unexplained_watts", "predictions", "washing_machine", "washing_machine_stage"]
             writer.writerow(columns)
             yield buffer.getvalue()
             for row in store.export_rows():

@@ -1,6 +1,14 @@
+import hashlib
+import json
 import unittest
 
-from realistic import RealisticHome, realistic_sessions
+from realistic import WASHER_V2_NEXT, RealisticHome, realistic_sessions
+
+# Captured before washer v2 existed; these modes must never change.
+GOLDEN = {'default': 'b7f0a092463f3a3c', 'washer_v1': '743dbf5f3915ceff', 'fridge_v2': 'b4472f1d15ccc013'}
+STAGE_WATTS = {'off': (0, 0), 'fill': (8 * .95, 90 * 1.05), 'heat': (2000 * .98, 2500 * 1.02),
+               'wash': (4 * .95, 200 * 1.05), 'pause': (2, 2), 'drain': (30 * .95, 60 * 1.05),
+               'spin': (150 * .95, 550 * 1.05)}
 
 
 class RealisticTests(unittest.TestCase):
@@ -31,6 +39,32 @@ class RealisticTests(unittest.TestCase):
         self.assertGreater(session[start]['refrigerator'], session[start + 60]['refrigerator'] * 1.05)
         with self.assertRaises(ValueError):
             RealisticHome(fridge='v3')
+
+    def test_existing_simulations_are_unchanged(self):
+        digest = lambda **kw: hashlib.sha256(json.dumps(realistic_sessions(42, 2, 3000, **kw)).encode()).hexdigest()[:16]
+        self.assertEqual(digest(), GOLDEN['default'])
+        self.assertEqual(digest(washer=True), GOLDEN['washer_v1'])
+        self.assertEqual(digest(fridge='v2'), GOLDEN['fridge_v2'])
+
+    def test_washer_v2_runs_a_full_cycle_in_order_within_ranges(self):
+        home, base = RealisticHome(7, washer='v2'), RealisticHome(7)
+        stages = []
+        for _ in range(8000):
+            row, plain = home.sample(), base.sample()
+            stage, watts = row['washing_machine_stage'], row['washing_machine']
+            low, high = STAGE_WATTS[stage]
+            self.assertTrue(low <= watts <= high, (stage, watts))
+            # Other loads are untouched; the household total adds exactly the washer.
+            self.assertEqual({k: row[k] for k in ('lamp', 'refrigerator', 'microwave')},
+                             {k: plain[k] for k in ('lamp', 'refrigerator', 'microwave')})
+            self.assertAlmostEqual(row['total_watts'] - plain['total_watts'], watts, delta=.011)
+            if not stages or stages[-1] != stage:
+                stages.append(stage)
+        self.assertEqual(stages, ['off', 'fill', 'heat', 'wash', 'pause', 'drain', 'spin', 'off'])
+        self.assertTrue(all(WASHER_V2_NEXT[a] == b for a, b in zip(stages, stages[1:])))  # No off -> spin.
+        self.assertIsNone(home.washer_v2.cycle_seconds)  # Finished cycles reset their timer.
+        with self.assertRaises(ValueError):
+            RealisticHome(washer='v3')
 
     def test_manual_off_does_not_erase_background_load(self):
         home = RealisticHome(12)
