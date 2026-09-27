@@ -36,11 +36,10 @@ body { background: var(--paper); color: var(--ink); letter-spacing: -.011em; }
   border-radius: 36px; background: var(--white); box-shadow: var(--shadow);
 }
 .hero-art {
-  position: absolute; inset: 0 0 0 42%; z-index: -1;
-  background: url('/static/img/hero.webp') center / cover no-repeat,
-              radial-gradient(120% 90% at 70% 40%, #d8f3e4 0%, #eef8f2 38%, var(--white) 70%);
-  -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 30%);
-          mask-image: linear-gradient(90deg, transparent 0%, #000 30%);
+  /* Transparent Higgsfield render (static/img/hero.webp) over a soft green glow; the glow alone is the fallback. */
+  position: absolute; inset: 4% 3% 4% 50%; z-index: -1;
+  background: url('/static/img/hero.webp') center / contain no-repeat,
+              radial-gradient(closest-side, rgba(23, 178, 106, .16), transparent);
 }
 .page-heading.hero .eyebrow { color: var(--green); font-weight: 600; letter-spacing: .02em; font-size: .8125rem; }
 .page-heading.hero h1 {
@@ -89,7 +88,8 @@ select, input { border: 0; background-color: var(--fill); border-radius: 12px; c
 
 /* Appliance cards: illustration first, like a product tile. */
 .appliance-card { padding: 22px; }
-.device-art { display: block; width: 100%; aspect-ratio: 16 / 10; object-fit: contain; margin: 4px 0 10px; border-radius: 18px; background: var(--paper); }
+.device-art { display: block; width: 100%; aspect-ratio: 16 / 10; object-fit: contain; padding: 14px; margin: 4px 0 12px; border-radius: 20px; background: var(--paper); }
+.washer-card .device-art { max-width: 280px; }
 .device-art[hidden] { display: none; }
 .washer-card { padding: 26px; }
 .washer-card > strong { font-size: 2rem; letter-spacing: -.04em; }
@@ -102,7 +102,7 @@ select, input { border: 0; background-color: var(--fill); border-radius: 12px; c
 
 @media (max-width: 900px) {
   .page-heading.hero { grid-template-columns: 1fr; min-height: 0; padding-bottom: 220px; }
-  .hero-art { inset: auto 0 0 0; height: 240px; -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 35%); mask-image: linear-gradient(180deg, transparent 0%, #000 35%); }
+  .hero-art { inset: auto 0 12px 0; height: 220px; }
 }
 @media (max-width: 700px) {
   .page-heading.hero { border-radius: 26px; }
@@ -116,7 +116,7 @@ select, input { border: 0; background-color: var(--fill); border-radius: 12px; c
     --shadow: 0 1px 2px rgba(0, 0, 0, .4), 0 12px 32px rgba(0, 0, 0, .35);
     --shadow-lift: 0 2px 4px rgba(0, 0, 0, .5), 0 20px 44px rgba(0, 0, 0, .45);
   }
-  .hero-art { background: url('/static/img/hero.webp') center / cover no-repeat, radial-gradient(120% 90% at 70% 40%, #0f3b27 0%, #0b1f16 45%, var(--white) 75%); }
+  .hero-art { background: url('/static/img/hero.webp') center / contain no-repeat, radial-gradient(closest-side, rgba(48, 209, 88, .2), transparent); }
   .stat.primary, .dark, .button.primary { background: linear-gradient(150deg, #1f9d5c, #0b7a4b 60%, #06552f); color: #fff; }
   .secondary:hover { background: #3a3a3c; }
   .mode-switch button[aria-pressed=true] { background: #636366; color: #fff; }
@@ -132,4 +132,19 @@ select, input { border: 0; background-color: var(--fill); border-radius: 12px; c
 @media (prefers-reduced-motion: reduce) {
   .stat:hover, .appliance-card:hover { transform: none; }
 }
-.hero-actions .button { min-height: 48px; padding: 12px 24px; display: inline-flex; align-items: center; gap: 6px; }
+.hero-actions .button { min-height: 48px; padding: 12px 24px; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+.washer-card:not([hidden]) { display: grid; grid-template-columns: minmax(0, 260px) 1fr; column-gap: 32px; align-items: center; }
+.washer-card .device-art { grid-row: 1 / span 3; margin: 0; }
+.washer-card > :not(.device-art) { grid-column: 2; }
+@media (max-width: 700px) {
+  .washer-card:not([hidden]) { grid-template-columns: 1fr; }
+  .washer-card .device-art { grid-row: auto; margin-bottom: 12px; }
+  .washer-card > :not(.device-art) { grid-column: 1; }
+}
+@media (prefers-color-scheme: dark) {
+  .page-heading.hero h1 em { background-image: linear-gradient(100deg, #30d158 10%, #66e39a 55%, #40c8e0 95%); }
+}
+.hero-actions { align-items: center; }
+.hero-actions .export { margin-top: 0; padding: 12px 24px; font-size: .9375rem; }
+.hero-actions .export span { display: inline; }
+@media (max-width: 900px) { .page-heading.hero { padding-bottom: 250px; } }
