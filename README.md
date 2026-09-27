@@ -14,6 +14,23 @@ limitations. [REFIT first look](docs/refit-first-look.md) explains the source da
 The [extended REFIT check](docs/extended-refit-check.md) adds 9,800 real readings,
 five saved stress-test reports and the dashboard usability refresh.
 
+Later milestones are documented in:
+- [Fridge development v1–v4](docs/fridge-development.md): timing fix, relative
+  features and multi-house training.
+- [Final House 5 test](docs/final-test.md): real-trained vs synthetic-trained
+  models.
+- [Simulator fridge v2](docs/simulator-fridge-v2.md).
+
+To inspect any saved result, open **Experiments** in the dashboard and pick a
+report. The page then shows:
+- **TESTED ON / TRAINED ON** badges for real or synthetic data.
+- The dataset, model, F1, MAE and energy, with a plain-language explanation.
+- An ON/OFF strip comparing actual and predicted states.
+- Actual vs. predicted watts.
+- The prediction error (predicted − actual).
+
+Reports and recordings stay local; Git does not transfer them.
+
 ## Run
 
 ### Edit online with GitHub Codespaces

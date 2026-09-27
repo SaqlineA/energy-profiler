@@ -59,3 +59,24 @@ class ExperimentTests(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+
+
+class DescribeTests(unittest.TestCase):
+    def test_labels_sources_and_plain_explanations(self):
+        from experiment_routes import describe
+        device = {'samples': 10, 'positive_samples': 5, 'negative_samples': 5, 'recall': .2, 'precision': .5,
+                  'confusion': {'tp': 1, 'fp': 1, 'fn': 4, 'tn': 4}, 'true_kwh': 1.0, 'estimated_kwh': .6}
+        real = describe({'provenance': {'name': 'FINAL House 5 / real_v4r_decision_tree', 'evaluation_role': 'final_test',
+                                        'evaluation_house': 5},
+                         'model': {'algorithm': 'decision_tree', 'training_source': 'REFIT Houses [1, 3, 4] training'},
+                         'devices': {'refrigerator': device}})
+        self.assertEqual(real['label'], 'FINAL House 5 — Real-trained Decision Tree')
+        self.assertEqual((real['evaluation_data'], real['training_data'], real['training']), ('real', 'real', 'REFIT Houses 1, 3, 4'))
+        self.assertEqual(real['explanations']['refrigerator'],
+                         'The model detected some refrigerator activity but missed many ON periods (20% found). '
+                         '50% of its ON predictions were false alarms. It underestimated total refrigerator energy by 40%.')
+        synthetic = describe({'provenance': {'name': 'Cadence v1 / always_off / synthetic 8s'},
+                              'model': {'algorithm': 'always_off', 'training_source': 'realistic'},
+                              'devices': {'lamp': {**device, 'confusion': {'tp': 0, 'fp': 0, 'fn': 5, 'tn': 5}, 'true_kwh': None}}})
+        self.assertEqual((synthetic['evaluation_data'], synthetic['training_data'], synthetic['group']), ('synthetic', 'none', 'other'))
+        self.assertIn('never predicted the lamp ON', synthetic['explanations']['lamp'])
