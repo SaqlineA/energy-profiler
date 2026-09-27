@@ -2,6 +2,7 @@
 
 import csv
 import io
+import re
 import runpy
 import tempfile
 import unittest
@@ -142,9 +143,10 @@ class ProjectTests(unittest.TestCase):
             self.assertEqual(len(list(csv.DictReader(io.StringIO(other.get('/api/export.csv').text)))), 1)
 
     def test_web_assets_and_docs(self):
-        self.assertIn('Your home, in watts.', self.client.get('/').text)
-        self.assertEqual(self.client.get('/static/app.js').status_code, 200)
-        self.assertEqual(self.client.get('/static/style.css').status_code, 200)
+        visible_text = re.sub(r'<[^>]+>', '', self.client.get('/').text)
+        self.assertIn('Your home, in watts.', visible_text)
+        for asset in ('app.js', 'style.css', 'fluid.css', 'apple.css'):
+            self.assertEqual(self.client.get(f'/static/{asset}').status_code, 200)
         self.assertEqual(self.client.get('/docs').status_code, 200)
         self.assertEqual(self.client.get('/static/../app.py').status_code, 404)
 
