@@ -3,10 +3,12 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#101b17" />
+    <meta name="theme-color" content="#f5f5f7" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)" />
     <title>Current — Energy Profiler</title>
     <link rel="stylesheet" href="/static/style.css" />
     <link rel="stylesheet" href="/static/fluid.css" />
+    <link rel="stylesheet" href="/static/apple.css" />
     <script src="/static/app.js" defer></script>
     <script src="/static/experiments.js" defer></script>
   </head>
@@ -51,18 +53,17 @@
         <span id="connection" class="connection">Connecting…</span>
       </header>
       <div class="content">
-        <section class="page-heading">
+        <section class="page-heading hero">
+          <div class="hero-art" aria-hidden="true"></div>
           <div>
-            <div class="eyebrow">CURRENT / ENERGY RESEARCH LAB</div>
-            <h1>Your home, in watts.</h1>
+            <div class="eyebrow">Current · Energy research lab</div>
+            <h1>Your home, <em>in watts.</em></h1>
             <p>Follow the signal. Explore each appliance. Test what the model really knows.</p>
+            <div class="hero-actions">
+              <a class="button primary" href="#research">See the experiments</a>
+              <a class="button secondary export" href="/api/export.csv" aria-label="Export readings as CSV">↓ <span>Export readings</span></a>
+            </div>
           </div>
-          <a
-            class="button secondary export"
-            href="/api/export.csv"
-            aria-label="Export readings as CSV"
-            >↓ <span>Export readings</span></a
-          >
         </section>
         <div id="error" class="error" role="alert" hidden></div>
         <nav class="journey" aria-label="Dashboard sections">
@@ -220,6 +221,7 @@
           </div>
           <div class="appliance-grid" id="appliance-cards"></div>
           <article id="washer-card" class="panel washer-card" hidden aria-live="polite">
+            <img class="device-art" src="/static/img/washing_machine.webp" alt="" onerror="this.hidden = true" />
             <div class="eyebrow">WASHING MACHINE · SIMULATED, NOT ML-DETECTED</div>
             <strong id="washer-state">Off</strong>
             <dl class="result-facts">
