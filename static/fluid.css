@@ -65,6 +65,9 @@ details, .event-body small, .event-delta, .empty-event, .page-footer { color: va
 .source-panel > summary, .evaluation-settings summary { color: var(--ink); }
 :focus-visible { outline-color: var(--green); }
 .research-chart { width: 100%; height: auto; background: #fff; border-radius: 12px; }
+/* Dense time series stay legible on phones: the chart scrolls sideways, never the page. */
+.chart-scroll { overflow-x: auto; border-radius: 12px; }
+.chart-scroll .research-chart { display: block; min-width: 560px; min-height: 0; }
 .chart-title { margin: 22px 0 6px; font-size: .9375rem; font-weight: 600; color: var(--ink); }
 .result-summary { margin: 16px 0 4px; padding: 18px; border: 1px solid var(--line); border-radius: 16px; background: var(--paper); }
 .data-badges { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
@@ -72,7 +75,7 @@ details, .event-body small, .event-delta, .empty-event, .page-footer { color: va
 .data-badge.real { background: var(--green); color: #fff; }
 .data-badge.synthetic { background: #6a3f8f; color: #fff; }
 .data-badge.none { background: var(--white); color: var(--muted); border: 1px solid var(--line); }
-.result-facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px 20px; margin: 0; }
+.result-facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(max(120px, 22%), 1fr)); gap: 12px 20px; margin: 0; }
 .result-facts div { min-width: 0; }
 .result-facts dt { font-size: .6875rem; color: var(--muted); letter-spacing: .04em; }
 .result-facts dd { margin: 2px 0 0; font-size: 1rem; font-weight: 600; color: var(--ink); overflow-wrap: anywhere; font-variant-numeric: tabular-nums; }

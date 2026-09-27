@@ -156,7 +156,8 @@
         const label = r.describe?.label ?? r.provenance.name ?? r.id.slice(0, 8);
         if (group !== 'other' && seen.has(label)) return;
         seen.add(label);
-        const source = r.describe ? ` · ${r.describe.evaluation_data} test data` : '';
+        const d = r.describe;
+        const source = d ? ` · ${d.training_data === 'none' ? 'no training' : `trained on ${d.training_data} data`}, tested on ${d.evaluation_data} data` : '';
         optgroup.append(new Option(group === 'other' ? `${label} · ${r.policy}${source}` : label + source, r.id));
       });
       if (optgroup.children.length) view.append(optgroup);

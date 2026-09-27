@@ -38,7 +38,8 @@ def explain(m, device='appliance'):
             text += f" {1 - m['precision']:.0%} of its ON predictions were false alarms."
     if m.get('true_kwh'):
         ratio = m['estimated_kwh'] / m['true_kwh']
-        text += (f' It estimated total {device} energy within {abs(ratio - 1):.0%}.' if .8 <= ratio <= 1.2 else
+        text += (f' It estimated no {device} energy at all.' if not m['estimated_kwh'] else
+                 f' It estimated total {device} energy within {abs(ratio - 1):.0%}.' if .8 <= ratio <= 1.2 else
                  f" It {'underestimated' if ratio < 1 else 'overestimated'} total {device} energy by {abs(ratio - 1):.0%}.")
     return text
 
@@ -65,7 +66,7 @@ def describe(report):
             'dataset': f'REFIT House {house}' if house is not None else name,
             'training_data': trained,
             'training': ('No training (fixed rule)' if trained == 'none' else
-                         f"REFIT Houses {', '.join(houses)}" if houses else f'Simulator ({training or "synthetic"})'),
+                         f"REFIT Houses {', '.join(houses)}" if houses else f'Simulated data ({training or "synthetic"})'),
             'model': ALGORITHMS.get(model.get('algorithm'), model.get('algorithm') or 'Original live model'),
             'explanations': {key: explain(m, key.replace('_', ' ')) for key, m in report.get('devices', {}).items()}}
 
