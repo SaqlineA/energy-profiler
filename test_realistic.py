@@ -66,6 +66,21 @@ class RealisticTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             RealisticHome(washer='v3')
 
+    def test_microwave_v2_is_occasional_and_bounded(self):
+        home = RealisticHome(42, microwave='v2')
+        runs, run = [], 0
+        for _ in range(3 * 86400):
+            if home.sample()['microwave'] > 100:
+                run += 1
+            elif run:
+                runs.append(run)
+                run = 0
+        self.assertTrue(1 <= len(runs) <= 20, len(runs))  # 1-6 uses/day, not hundreds.
+        self.assertTrue(all(20 <= r <= 300 for r in runs), runs)
+        self.assertTrue(1000 <= home.nominal['microwave'] <= 1400)
+        with self.assertRaises(ValueError):
+            RealisticHome(microwave='v3')
+
     def test_manual_off_does_not_erase_background_load(self):
         home = RealisticHome(12)
         row = home.sample({'lamp': False, 'refrigerator': False, 'microwave': False})

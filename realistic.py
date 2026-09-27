@@ -74,9 +74,11 @@ class WasherV2:
 
 
 class RealisticHome:
-    def __init__(self, seed=42, washer=False, start=None, fridge='v1'):
+    def __init__(self, seed=42, washer=False, start=None, fridge='v1', microwave='v1'):
         if fridge not in ('v1', 'v2'):
             raise ValueError('Unknown fridge model')
+        if microwave not in ('v1', 'v2'):
+            raise ValueError('Unknown microwave model')
         if washer not in (False, True, 'v1', 'v2'):
             raise ValueError('Unknown washer model')
         self.rng = random.Random(seed)
@@ -102,6 +104,12 @@ class RealisticHome:
             self.on['refrigerator'] = self.rng.random() < .25
             self.fridge_remaining = self.rng.randint(1, self.fridge_cycle())
         self.washer_v2 = WasherV2(seed) if washer == 'v2' else None
+        self.microwave = microwave
+        if microwave == 'v2':
+            # Own RNG: REFIT Houses 2-4 use a microwave 1-6 times a day (docs/simulator-microwave-v2.md).
+            self.microwave_rng = random.Random(f'microwave-v2-{seed}')
+            self.nominal['microwave'] = self.microwave_rng.uniform(1000, 1400)
+            self.microwave_rate = self.microwave_rng.uniform(1, 6) / 86400
 
     def sample(self, manual=None):
         rng = self.rng
@@ -112,7 +120,10 @@ class RealisticHome:
             if self.fridge_remaining <= 0:
                 self.on['refrigerator'] = not self.on['refrigerator']
                 self.fridge_remaining = self.fridge_cycle() if self.fridge == 'v2' else rng.randint(90, 360)
-            if self.microwave_remaining <= 0 and rng.random() < .008:
+            if self.microwave == 'v2':
+                if self.microwave_remaining <= 0 and self.microwave_rng.random() < self.microwave_rate:
+                    self.microwave_remaining = int(20 * 15 ** self.microwave_rng.random())  # Log-uniform 20-300 s.
+            elif self.microwave_remaining <= 0 and rng.random() < .008:
                 self.microwave_remaining = rng.randint(15, 90)
             self.on['microwave'] = self.microwave_remaining > 0
             self.microwave_remaining -= 1
@@ -161,10 +172,10 @@ class RealisticHome:
         return self.rng.randint(1500, 1800) if self.on['refrigerator'] else self.rng.randint(3600, 7200)
 
 
-def realistic_sessions(seed, count, seconds=600, washer=False, fridge='v1'):
+def realistic_sessions(seed, count, seconds=600, washer=False, fridge='v1', microwave='v1'):
     sessions = []
     for index in range(count):
         home = RealisticHome(seed + index * 997, washer,
-            datetime(2020, 1, 1, tzinfo=timezone.utc) + timedelta(days=index), fridge)
+            datetime(2020, 1, 1, tzinfo=timezone.utc) + timedelta(days=index), fridge, microwave)
         sessions.append([home.sample() for _ in range(seconds)])
     return sessions
