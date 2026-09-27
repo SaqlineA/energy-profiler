@@ -112,8 +112,8 @@ kettle-sized loads (13–26% → 37–38%), which is the opposite of what was ex
 
 **Limits.**
 - This is synthetic evaluation on the same simulator family used for training.
-- The Step 11 final test showed synthetic-trained scores can fall a long way on
-  a real home (fridge: 0.69 synthetic-trained vs real-house results).
+- For the fridge, synthetic tests gave F1 0.88 (cadence v1), but a
+  synthetic-trained model reached only 0.69 on real House 5 in Step 11.
 - There is one seed per split.
 - No candidate is promoted; the live model is unchanged; House 5 and all REFIT
   data were untouched.
