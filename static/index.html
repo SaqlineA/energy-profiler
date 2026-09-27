@@ -222,7 +222,7 @@
 
         <section class="panel research-panel" id="research" aria-labelledby="research-heading">
           <div class="panel-heading"><div><div class="eyebrow">EXPERIMENT WORKBENCH</div><h2 id="research-heading">Actual vs. predicted</h2>
-            <p>Measured appliance watts and raw model estimates. Dashed estimates can be uncertain.</p></div></div>
+            <p>Pick a saved experiment to see what the model got right, what it missed, and which data it used.</p></div></div>
           <div class="source-controls">
             <label>View <select id="experiment-view"><option value="">Live session</option></select></label>
             <label>Appliance <select id="comparison-device">
@@ -231,9 +231,23 @@
             </select></label>
             <button id="refresh-experiments" class="button secondary">Refresh history</button>
           </div>
+          <div id="result-summary" class="result-summary" hidden>
+            <div class="data-badges"><span id="evaluation-badge" class="data-badge"></span><span id="training-badge" class="data-badge"></span></div>
+            <dl id="result-facts" class="result-facts"></dl>
+            <p id="result-explanation" class="result-explanation"></p>
+          </div>
+          <h3 class="chart-title">Was it on? Actual vs. predicted</h3>
+          <p id="state-summary" class="research-note"></p>
+          <svg id="state-chart" class="research-chart" viewBox="0 0 800 84" role="img" aria-label="Actual and predicted on periods"></svg>
+          <div class="comparison-key swatch-key"><span><i class="swatch actual"></i>Top: actually on</span><span><i class="swatch predicted"></i>Bottom: model said on</span></div>
+          <h3 class="chart-title">Power: actual vs. predicted</h3>
           <p id="comparison-summary" class="research-note" role="status">Waiting for readings.</p>
-          <svg id="comparison-chart" viewBox="0 0 800 230" role="img" aria-label="Appliance measured and estimated power"></svg>
+          <svg id="comparison-chart" class="research-chart" viewBox="0 0 800 230" role="img" aria-label="Appliance measured and estimated power"></svg>
           <div class="comparison-key"><span>Solid: measured</span><span>Dashed: raw ML estimate</span></div>
+          <h3 class="chart-title">Prediction error (predicted − actual)</h3>
+          <p id="error-summary" class="research-note"></p>
+          <svg id="error-chart" class="research-chart" viewBox="0 0 800 170" role="img" aria-label="Prediction error over time"></svg>
+          <div class="comparison-key swatch-key"><span><i class="swatch over"></i>Above zero: overestimate</span><span><i class="swatch under"></i>Below zero: underestimate</span></div>
           <p id="experiment-note" class="research-note"></p>
           <details class="evaluation-settings">
           <summary>Run a new frozen-model evaluation</summary>

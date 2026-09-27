@@ -64,6 +64,23 @@ details, .event-body small, .event-delta, .empty-event, .page-footer { color: va
 .per-device span, .device-icon, .pill, .model-badge { background: var(--lime); color: var(--green); }
 .source-panel > summary, .evaluation-settings summary { color: var(--ink); }
 :focus-visible { outline-color: var(--green); }
+.research-chart { width: 100%; height: auto; background: #fff; border-radius: 12px; }
+.chart-title { margin: 22px 0 6px; font-size: .9375rem; font-weight: 600; color: var(--ink); }
+.result-summary { margin: 16px 0 4px; padding: 18px; border: 1px solid var(--line); border-radius: 16px; background: var(--paper); }
+.data-badges { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
+.data-badge { padding: 5px 12px; border-radius: 999px; font-size: .6875rem; font-weight: 700; letter-spacing: .08em; }
+.data-badge.real { background: var(--green); color: #fff; }
+.data-badge.synthetic { background: #6a3f8f; color: #fff; }
+.data-badge.none { background: var(--white); color: var(--muted); border: 1px solid var(--line); }
+.result-facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px 20px; margin: 0; }
+.result-facts div { min-width: 0; }
+.result-facts dt { font-size: .6875rem; color: var(--muted); letter-spacing: .04em; }
+.result-facts dd { margin: 2px 0 0; font-size: 1rem; font-weight: 600; color: var(--ink); overflow-wrap: anywhere; font-variant-numeric: tabular-nums; }
+.result-explanation { margin: 14px 0 0; line-height: 1.6; color: var(--ink); max-width: 60rem; }
+.swatch-key span::before { content: none; }
+.swatch { display: inline-block; width: 12px; height: 12px; margin-right: 6px; border-radius: 3px; vertical-align: -1px; }
+.swatch.actual { background: #426635; } .swatch.predicted { background: #995127; }
+.swatch.over { background: #b0561f; } .swatch.under { background: #2f5f8a; }
 @supports (backdrop-filter: blur(1px)) {
   .sidebar, .topbar { backdrop-filter: blur(22px) saturate(1.15); -webkit-backdrop-filter: blur(22px) saturate(1.15); }
 }
@@ -92,6 +109,8 @@ details, .event-body small, .event-delta, .empty-event, .page-footer { color: va
   .chart-wrap { background: #fff; border-radius: 12px; }
   .pill, .device-icon, .model-badge { background: var(--lime); color: var(--ink); }
   .device-bottom .prediction.mismatch { color: #efb575; }
+  .data-badge.real { background: #285f43; }
+  .data-badge.synthetic { background: #7d52a3; }
 }
 @media (prefers-reduced-transparency: reduce), (prefers-contrast: more) {
   .sidebar, .topbar { background: var(--white); backdrop-filter: none; -webkit-backdrop-filter: none; }
