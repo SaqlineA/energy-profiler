@@ -81,6 +81,19 @@ class RealisticTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             RealisticHome(microwave='v3')
 
+    def test_background_v2_changes_only_unmetered_load(self):
+        old, new = RealisticHome(5, washer='v2'), RealisticHome(5, washer='v2', background='v2')
+        labelled = ('lamp', 'refrigerator', 'microwave', 'washing_machine')
+        unmetered = []
+        for _ in range(86400):
+            a, b = old.sample(), new.sample()
+            self.assertEqual({k: a[k] for k in labelled}, {k: b[k] for k in labelled})
+            unmetered.append(b['total_watts'] - sum(b[k] for k in labelled))
+        self.assertGreater(min(unmetered), 60 * .8 - 10)  # Baseload never vanishes (minus sensor noise).
+        self.assertGreater(max(unmetered), 1000)  # Kettle-sized loads occur within a day.
+        with self.assertRaises(ValueError):
+            RealisticHome(background='v3')
+
     def test_manual_off_does_not_erase_background_load(self):
         home = RealisticHome(12)
         row = home.sample({'lamp': False, 'refrigerator': False, 'microwave': False})

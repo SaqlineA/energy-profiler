@@ -73,10 +73,37 @@ class WasherV2:
         return round(power, 2)
 
 
+class BackgroundV2:
+    """Baseload plus random unmetered loads (docs/simulator-background-v2.md). Own seeded RNG."""
+
+    def __init__(self, seed):
+        rng = self.rng = random.Random(f'background-v2-{seed}')
+        self.base = self.level = rng.uniform(60, 180)
+        # One documented revision (was 50-100/day, 1-30 min; 15-30/day, 1-10 min): see design doc.
+        self.medium_rate = rng.uniform(60, 120) / 86400  # Lights, TV, computers.
+        self.large_rate = rng.uniform(20, 35) / 86400  # Kettle, oven, toaster, iron.
+        self.loads = []  # [watts, seconds left]
+
+    def sample(self):
+        rng = self.rng
+        self.level = min(self.base * 1.2, max(self.base * .8, self.level + rng.uniform(-.5, .5)))
+        if rng.random() < self.medium_rate:
+            self.loads.append([rng.uniform(100, 600), int(60 * 10 ** rng.random())])  # Log-uniform 1-10 min.
+        if rng.random() < self.large_rate:
+            self.loads.append([rng.uniform(1000, 3000), int(60 * 5 ** rng.random())])  # Log-uniform 1-5 min.
+        watts = self.level + sum(w for w, _ in self.loads)
+        for load in self.loads:
+            load[1] -= 1
+        self.loads = [load for load in self.loads if load[1] > 0]
+        return watts
+
+
 class RealisticHome:
-    def __init__(self, seed=42, washer=False, start=None, fridge='v1', microwave='v1'):
+    def __init__(self, seed=42, washer=False, start=None, fridge='v1', microwave='v1', background='v1'):
         if fridge not in ('v1', 'v2'):
             raise ValueError('Unknown fridge model')
+        if background not in ('v1', 'v2'):
+            raise ValueError('Unknown background model')
         if microwave not in ('v1', 'v2'):
             raise ValueError('Unknown microwave model')
         if washer not in (False, True, 'v1', 'v2'):
@@ -104,6 +131,7 @@ class RealisticHome:
             self.on['refrigerator'] = self.rng.random() < .25
             self.fridge_remaining = self.rng.randint(1, self.fridge_cycle())
         self.washer_v2 = WasherV2(seed) if washer == 'v2' else None
+        self.background_v2 = BackgroundV2(seed) if background == 'v2' else None
         self.microwave = microwave
         if microwave == 'v2':
             # Own RNG: REFIT Houses 2-4 use a microwave 1-6 times a day (docs/simulator-microwave-v2.md).
@@ -158,7 +186,9 @@ class RealisticHome:
             self.wash_stage = self.washer_v2.stage
         self.background = max(5, min(200, self.background + rng.uniform(-1, 1)))
         unknown = 80 if self.second % 240 < 40 else 0
-        total = round(max(0, sum(watts.values()) + self.background + unknown + rng.gauss(0, 2)), 2)
+        # v2 keeps the v1 draw above so every labelled appliance matches v1 exactly.
+        other = self.background_v2.sample() if self.background_v2 else self.background + unknown
+        total = round(max(0, sum(watts.values()) + other + rng.gauss(0, 2)), 2)
         row = {'timestamp': (self.start + timedelta(seconds=self.second)).isoformat(),
                'total_watts': total, **watts}
         if self.washer_v2:
@@ -172,10 +202,10 @@ class RealisticHome:
         return self.rng.randint(1500, 1800) if self.on['refrigerator'] else self.rng.randint(3600, 7200)
 
 
-def realistic_sessions(seed, count, seconds=600, washer=False, fridge='v1', microwave='v1'):
+def realistic_sessions(seed, count, seconds=600, washer=False, fridge='v1', microwave='v1', background='v1'):
     sessions = []
     for index in range(count):
         home = RealisticHome(seed + index * 997, washer,
-            datetime(2020, 1, 1, tzinfo=timezone.utc) + timedelta(days=index), fridge, microwave)
+            datetime(2020, 1, 1, tzinfo=timezone.utc) + timedelta(days=index), fridge, microwave, background)
         sessions.append([home.sample() for _ in range(seconds)])
     return sessions

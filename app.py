@@ -118,10 +118,11 @@ class EnergyProfiler:
         self.transitions = TransitionTracker()
         self.correct_predictions = self.evaluated = self.predicted_count = self.peak_watts = 0
         self.started_at = datetime.now(timezone.utc)
-        # expanded keeps the compressed v1 washer; household is the real-data-based demo (fridge, microwave, washer v2).
+        # expanded keeps the compressed v1 washer; household is the real-data-based demo (fridge, microwave, washer, background v2).
         self.realistic_home = RealisticHome(washer={'expanded': 'v1', 'household': 'v2'}.get(self.profile, False),
                                             start=self.started_at, fridge='v2' if self.profile == 'household' else 'v1',
-                                            microwave='v2' if self.profile == 'household' else 'v1')
+                                            microwave='v2' if self.profile == 'household' else 'v1',
+                                            background='v2' if self.profile == 'household' else 'v1')
         self.washer_energy = self.washer_coverage = 0.0
         self.running, self.error = True, None
 
