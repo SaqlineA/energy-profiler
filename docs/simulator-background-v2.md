@@ -64,3 +64,50 @@ as for the real houses. v2 passes if:
   at night.
 - Loads are flat steps: no thermostat cycling, no dimmers, no motors.
 - There is no seasonal heating.
+
+## Result (2026-09-26)
+
+Two homes (seeds 42 and 1039) were each simulated for 14 days, with fridge,
+microwave and washer v2 running.
+
+**First run (as designed): 7 of 12 checks passed.** Unmetered p90 was 864 and
+675 W, p50 was 183 W (seed 42), 200–1,000 W rises were 43 per day (seed 1039)
+and >1 kW rises were 18 per day (seed 42). The cause was that medium loads were
+sized from their *median* duration. Long runs pull the average up to about
+8.5 min, so a medium load was running about 44% of the time.
+
+**One documented revision:**
+- Medium loads: 1–30 min → 1–10 min, and 50–100 → 60–120 starts per day.
+- Large loads: 1–10 min → 1–5 min, and 15–30 → 20–35 starts per day.
+
+It was not tuned further after that.
+
+| Check | Target | Seed 42 | Seed 1039 |
+|---|---|---:|---:|
+| Baseload p50 | 60–180 W | 147 ✅ | 103 ✅ |
+| Unmetered p50 | 50–180 W | 173 ✅ | 123 ✅ |
+| Unmetered p90 | 275–555 W | **677 ❌** | 548 ✅ |
+| Unmetered p99 | 2,100–3,200 W | 2,719 ✅ | 2,779 ✅ |
+| Rises 200–1,000 W per day | 45–95 | 88 ✅ | 51 ✅ |
+| Rises above 1 kW per day | 20–35 | 22 ✅ | 27 ✅ |
+
+**Verdict: partial pass, 11 of 12 checks.** Seed 42's simulated home is busier
+at its 90th percentile than any of the four real homes (677 vs at most 553 W).
+This is left as measured. For comparison, v1 had an unmetered p90 of about
+190 W and p99 of about 265 W, with **no** rises above 200 W.
+
+**Checks:**
+- v1 fingerprints are unchanged.
+- The labelled appliances (lamp, fridge, microwave, washer) are identical under
+  background v1 and v2 over a simulated day.
+- Unmetered load never falls below the baseload floor, and kettle-sized loads
+  appear within a day (`test_realistic.py`).
+- The `household` dashboard profile now uses fridge, microwave, washer and
+  background v2 (`test_project.py`).
+
+**Why this matters for the washer experiment.** Kettle-, oven- and
+iron-sized loads (1–3 kW for 1–5 min) now occur 20–35 times a day. They share
+the washer's 2 kW heating level but are shorter than its 10–15 min heating
+block, so a detector has to use duration and shape, not power alone. This is
+closer to the real problem. It also means the earlier "washer is visible in a
+quiet window" plots are an optimistic case.

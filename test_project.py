@@ -50,7 +50,8 @@ class ProjectTests(unittest.TestCase):
 
     def test_household_profile_runs_saves_and_exports_washer_v2(self):
         self.assertEqual(self.client.post('/api/simulation', json={'profile': 'household'}).status_code, 200)
-        self.assertEqual((self.profiler.realistic_home.washer, self.profiler.realistic_home.microwave), ('v2', 'v2'))
+        home = self.profiler.realistic_home
+        self.assertEqual((home.washer, home.microwave, home.background_v2 is not None), ('v2', 'v2', True))
         for _ in range(700):  # The first v2 cycle starts 2-10 minutes in.
             self.profiler.sample()
         washer = self.client.get('/api/state').json()['experimental_washer']
