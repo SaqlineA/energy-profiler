@@ -20,6 +20,7 @@ Later milestones are documented in:
 - [Final House 5 test](docs/final-test.md): real-trained vs synthetic-trained
   models.
 - [Simulator fridge v2](docs/simulator-fridge-v2.md).
+- [Experiment visualization](docs/experiment-visualization.md): how to read the dashboard charts.
 
 To inspect any saved result, open **Experiments** in the dashboard and pick a
 report. The page then shows:
