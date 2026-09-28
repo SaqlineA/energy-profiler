@@ -22,6 +22,7 @@ Later milestones are documented in:
 - [Simulator fridge v2](docs/simulator-fridge-v2.md).
 - [Experiment visualization](docs/experiment-visualization.md): how to read the dashboard charts.
 - [Washing machine](docs/washing-machine-profile.md): the real REFIT profile, and the [simulator v2 design and results](docs/washing-machine-design.md).
+- [Sensor setup](docs/sensor-setup.md): send readings from a device on your home network (Step 16; no hardware validated yet).
 
 To inspect any saved result, open **Experiments** in the dashboard and pick a
 report. The page then shows:

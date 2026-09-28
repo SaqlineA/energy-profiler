@@ -102,7 +102,12 @@ function render() {
   const r = state.latest;
   if (loadedSession !== state.session) readings = [];
   $("source-badge").textContent = state.source === 'simulator' ? 'SIMULATED DATA' : state.source === 'sensor' ? 'LOCAL SENSOR INPUT' : 'RECORDED CSV';
-  $("replay-status").textContent = state.replay.loaded
+  const sensor = state.sensor;
+  $("replay-status").textContent = state.source === 'sensor'
+    ? (sensor.accepted
+        ? `Sensor: ${sensor.accepted} readings received · last ${Math.round(sensor.seconds_since_last)} s ago${sensor.stale ? ' · no recent readings' : ''}`
+        : 'Sensor: waiting for the first reading.')
+    : state.replay.loaded
     ? `${state.replay.provenance.name} · ${state.replay.position}/${state.replay.loaded} rows · ${state.replay.cadence_seconds}s interval`
     : 'No recording loaded.';
   $("power").textContent = r?.total_watts != null
