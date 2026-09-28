@@ -1,0 +1,571 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-09-28T00:16:36+00:00",
+  "title": "Design System: Current — Energy Profiler",
+  "extensions": {
+    "colorMeta": {
+      "current-green": {
+        "role": "primary",
+        "displayName": "Current Green",
+        "canonical": "#0b7a4b",
+        "tonalRamp": [
+          "#06462b",
+          "#0b7c4c",
+          "#10b16d",
+          "#15e78e",
+          "#47eea8",
+          "#7df3c1",
+          "#b2f8da",
+          "#e8fdf4"
+        ]
+      },
+      "current-green-deep": {
+        "role": "primary",
+        "displayName": "Current Green Deep",
+        "canonical": "#06552f",
+        "tonalRamp": [
+          "#054728",
+          "#097e46",
+          "#0db464",
+          "#11eb82",
+          "#44f29e",
+          "#7af6ba",
+          "#b1f9d6",
+          "#e7fdf3"
+        ]
+      },
+      "current-green-bright": {
+        "role": "primary",
+        "displayName": "Current Green Bright",
+        "canonical": "#13a86a",
+        "tonalRamp": [
+          "#08452b",
+          "#0e794c",
+          "#14ad6d",
+          "#1ae28e",
+          "#4beba8",
+          "#7ff1c1",
+          "#b4f6db",
+          "#e8fcf4"
+        ]
+      },
+      "current-green-night": {
+        "role": "primary",
+        "displayName": "Current Green Night",
+        "canonical": "#30d158",
+        "tonalRamp": [
+          "#0e3f1a",
+          "#196e2e",
+          "#239e42",
+          "#2ece55",
+          "#5bdb7b",
+          "#8be5a1",
+          "#baf0c8",
+          "#eafaee"
+        ]
+      },
+      "signal-teal": {
+        "role": "primary",
+        "displayName": "Signal Teal",
+        "canonical": "#0a8f8a",
+        "tonalRamp": [
+          "#054845",
+          "#097e7a",
+          "#0db4ae",
+          "#10ebe3",
+          "#44f2eb",
+          "#7af6f1",
+          "#b1faf7",
+          "#e7fdfc"
+        ]
+      },
+      "mint-wash": {
+        "role": "primary",
+        "displayName": "Mint Wash",
+        "canonical": "#e3f4ea",
+        "tonalRamp": [
+          "#163723",
+          "#26613e",
+          "#368b59",
+          "#47b474",
+          "#6fc693",
+          "#99d7b2",
+          "#c3e7d2",
+          "#edf8f1"
+        ]
+      },
+      "synthetic-violet": {
+        "role": "secondary",
+        "displayName": "Synthetic Violet",
+        "canonical": "#6e3fa3",
+        "tonalRamp": [
+          "#251537",
+          "#422661",
+          "#5e368b",
+          "#7a46b5",
+          "#986ec7",
+          "#b699d7",
+          "#d4c3e8",
+          "#f2edf8"
+        ]
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "Ink",
+        "canonical": "#1d1d1f",
+        "tonalRamp": [
+          "#252528",
+          "#414146",
+          "#5d5d64",
+          "#797982",
+          "#97979e",
+          "#b6b6ba",
+          "#d4d4d7",
+          "#f2f2f3"
+        ]
+      },
+      "quiet-ink": {
+        "role": "neutral",
+        "displayName": "Quiet Ink",
+        "canonical": "#6e6e73",
+        "tonalRamp": [
+          "#252527",
+          "#424245",
+          "#5e5e63",
+          "#7b7b80",
+          "#99999d",
+          "#b6b6ba",
+          "#d4d4d6",
+          "#f2f2f3"
+        ]
+      },
+      "paper": {
+        "role": "neutral",
+        "displayName": "Paper",
+        "canonical": "#f5f5f7",
+        "tonalRamp": [
+          "#22222a",
+          "#3c3c4b",
+          "#56566b",
+          "#70708c",
+          "#9090a6",
+          "#b0b0c0",
+          "#d0d0da",
+          "#f1f1f4"
+        ]
+      },
+      "surface": {
+        "role": "neutral",
+        "displayName": "Surface",
+        "canonical": "#ffffff",
+        "tonalRamp": [
+          "#262626",
+          "#434343",
+          "#616161",
+          "#7e7e7e",
+          "#9b9b9b",
+          "#b8b8b8",
+          "#d5d5d5",
+          "#f2f2f2"
+        ]
+      },
+      "hairline": {
+        "role": "neutral",
+        "displayName": "Hairline",
+        "canonical": "#e5e5ea",
+        "tonalRamp": [
+          "#22222a",
+          "#3c3c4b",
+          "#56566b",
+          "#70708b",
+          "#9090a5",
+          "#b0b0c0",
+          "#d1d1da",
+          "#f1f1f4"
+        ]
+      },
+      "control-fill": {
+        "role": "neutral",
+        "displayName": "Control Fill",
+        "canonical": "#e8e8ed",
+        "tonalRamp": [
+          "#22222b",
+          "#3b3b4c",
+          "#55556c",
+          "#6e6e8d",
+          "#8f8fa7",
+          "#afafc1",
+          "#d0d0da",
+          "#f1f1f4"
+        ]
+      },
+      "night-canvas": {
+        "role": "neutral",
+        "displayName": "Night Canvas",
+        "canonical": "#000000",
+        "tonalRamp": [
+          "#262626",
+          "#434343",
+          "#616161",
+          "#7e7e7e",
+          "#9b9b9b",
+          "#b8b8b8",
+          "#d5d5d5",
+          "#f2f2f2"
+        ]
+      },
+      "night-surface": {
+        "role": "neutral",
+        "displayName": "Night Surface",
+        "canonical": "#1c1c1e",
+        "tonalRamp": [
+          "#252528",
+          "#414146",
+          "#5d5d64",
+          "#797982",
+          "#97979e",
+          "#b6b6ba",
+          "#d4d4d7",
+          "#f2f2f3"
+        ]
+      },
+      "night-fill": {
+        "role": "neutral",
+        "displayName": "Night Fill",
+        "canonical": "#2c2c2e",
+        "tonalRamp": [
+          "#252527",
+          "#424245",
+          "#5e5e63",
+          "#7b7b80",
+          "#99999d",
+          "#b6b6ba",
+          "#d4d4d6",
+          "#f2f2f3"
+        ]
+      },
+      "night-hairline": {
+        "role": "neutral",
+        "displayName": "Night Hairline",
+        "canonical": "#38383a",
+        "tonalRamp": [
+          "#262627",
+          "#424245",
+          "#5f5f62",
+          "#7b7b80",
+          "#99999d",
+          "#b7b7b9",
+          "#d4d4d6",
+          "#f2f2f2"
+        ]
+      },
+      "night-quiet-ink": {
+        "role": "neutral",
+        "displayName": "Night Quiet Ink",
+        "canonical": "#a1a1a6",
+        "tonalRamp": [
+          "#252527",
+          "#424245",
+          "#5e5e63",
+          "#7a7a81",
+          "#98989e",
+          "#b6b6ba",
+          "#d4d4d6",
+          "#f2f2f3"
+        ]
+      },
+      "measured-olive": {
+        "role": "data",
+        "displayName": "Measured Olive",
+        "canonical": "#426635",
+        "tonalRamp": [
+          "#21321a",
+          "#39592e",
+          "#527f42",
+          "#6ba556",
+          "#8cba7b",
+          "#adcea2",
+          "#cfe2c8",
+          "#f0f6ee"
+        ]
+      },
+      "estimate-rust": {
+        "role": "data",
+        "displayName": "Estimate Rust",
+        "canonical": "#995127",
+        "tonalRamp": [
+          "#3d2010",
+          "#6b391b",
+          "#9a5127",
+          "#c86a33",
+          "#d68b5f",
+          "#e2ad8e",
+          "#eecfbc",
+          "#faf0eb"
+        ]
+      },
+      "over-amber": {
+        "role": "data",
+        "displayName": "Over Amber",
+        "canonical": "#b0561f",
+        "tonalRamp": [
+          "#41200b",
+          "#733814",
+          "#a4501d",
+          "#d66826",
+          "#e18a55",
+          "#eaac86",
+          "#f2ceb8",
+          "#fbf0e9"
+        ]
+      },
+      "under-slate": {
+        "role": "data",
+        "displayName": "Under Slate",
+        "canonical": "#2f5f8a",
+        "tonalRamp": [
+          "#132739",
+          "#224565",
+          "#316390",
+          "#4081bb",
+          "#6a9ecc",
+          "#95badb",
+          "#c1d6ea",
+          "#ecf3f9"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "Hero headline only; one per page, key phrase in the green gradient."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Section and panel titles."
+      },
+      "metric": {
+        "displayName": "Metric",
+        "purpose": "Live numbers in stat tiles and the washer state word."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Chart titles in the experiment workbench."
+      },
+      "lead": {
+        "displayName": "Lead",
+        "purpose": "Hero sentence in Quiet Ink, max ~30rem."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Explanations, research notes, summaries."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Eyebrows and stat labels, sentence case."
+      }
+    },
+    "shadows": [
+      {
+        "name": "ambient",
+        "value": "0 1px 2px rgba(0,0,0,.04), 0 12px 32px rgba(0,0,0,.06)",
+        "purpose": "Every card at rest."
+      },
+      {
+        "name": "lift",
+        "value": "0 2px 4px rgba(0,0,0,.05), 0 20px 44px rgba(0,0,0,.09)",
+        "purpose": "Stat and appliance tiles on hover, with a 2px rise; hover pointers and motion allowed only."
+      },
+      {
+        "name": "live-glow",
+        "value": "0 16px 40px rgba(11,122,75,.28)",
+        "purpose": "Only the live-power tile."
+      },
+      {
+        "name": "segment-thumb",
+        "value": "0 1px 3px rgba(0,0,0,.12), 0 3px 8px rgba(0,0,0,.06)",
+        "purpose": "Selected segment in segmented controls."
+      }
+    ],
+    "motion": [
+      {
+        "name": "feedback",
+        "value": "180ms ease",
+        "purpose": "Button and nav background changes; 0.98 press scale."
+      },
+      {
+        "name": "lift",
+        "value": "220ms ease",
+        "purpose": "Card shadow and 2px rise on hover."
+      },
+      {
+        "name": "reduced-motion",
+        "value": "none",
+        "purpose": "prefers-reduced-motion removes transitions, lift and press scale."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "hero-stack",
+        "value": "900px"
+      },
+      {
+        "name": "compact-cards",
+        "value": "700px"
+      },
+      {
+        "name": "base-1180",
+        "value": "1180px"
+      },
+      {
+        "name": "base-950",
+        "value": "950px"
+      },
+      {
+        "name": "base-720",
+        "value": "720px"
+      },
+      {
+        "name": "base-600",
+        "value": "600px"
+      },
+      {
+        "name": "base-400",
+        "value": "400px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "The single Current Green pill for the main action in a view.",
+      "html": "<button class=\"ds-btn-primary\">See the experiments</button>",
+      "css": ".ds-btn-primary { background: var(--green, #0b7a4b); color: #fff; border: 0; border-radius: 980px; padding: 12px 24px; min-height: 48px; font: 600 0.9375rem/1 -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; letter-spacing: -0.011em; cursor: pointer; transition: background-color 180ms ease, transform 180ms ease; } .ds-btn-primary:hover { background: var(--green-deep, #06552f); } .ds-btn-primary:active { transform: scale(.98); } .ds-btn-primary:focus-visible { outline: 3px solid var(--green, #0b7a4b); outline-offset: 4px; }"
+    },
+    {
+      "name": "Secondary Button",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Grey-fill pill for everyday actions (export, refresh, load).",
+      "html": "<button class=\"ds-btn-secondary\">&darr; Export readings</button>",
+      "css": ".ds-btn-secondary { background: var(--fill, #e8e8ed); color: var(--ink, #1d1d1f); border: 0; border-radius: 980px; padding: 11px 22px; min-height: 44px; font: 600 0.9375rem/1 -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; cursor: pointer; transition: background-color 180ms ease; } .ds-btn-secondary:hover { background: #dcdce1; } .ds-btn-secondary:focus-visible { outline: 3px solid var(--green, #0b7a4b); outline-offset: 4px; }"
+    },
+    {
+      "name": "Segmented Control",
+      "kind": "custom",
+      "refersTo": "segmented-control",
+      "description": "Grey track with a white thumb; Auto / Manual and the section switcher.",
+      "html": "<div class=\"ds-seg\" role=\"group\"><button class=\"ds-seg-item\" aria-pressed=\"true\">Auto cycle</button><button class=\"ds-seg-item\" aria-pressed=\"false\">Manual</button></div>",
+      "css": ".ds-seg { display: inline-flex; gap: 2px; padding: 3px; background: var(--fill, #e8e8ed); border-radius: 980px; } .ds-seg-item { border: 0; background: transparent; color: var(--ink, #1d1d1f); border-radius: 980px; padding: 10px 22px; font: 500 0.8125rem/1 -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; cursor: pointer; transition: background-color 180ms ease; } .ds-seg-item[aria-pressed=true] { background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,.12), 0 3px 8px rgba(0,0,0,.06); } .ds-seg-item:focus-visible { outline: 3px solid var(--green, #0b7a4b); outline-offset: 2px; }"
+    },
+    {
+      "name": "Card",
+      "kind": "card",
+      "refersTo": "card",
+      "description": "Borderless white card, softly lifted on Paper.",
+      "html": "<article class=\"ds-card\"><h3 class=\"ds-card-title\">The power picture</h3><p class=\"ds-card-body\">Aggregate consumption &middot; source timestamps preserved</p></article>",
+      "css": ".ds-card { background: var(--white, #ffffff); border-radius: 28px; padding: 24px; max-width: 360px; box-shadow: 0 1px 2px rgba(0,0,0,.04), 0 12px 32px rgba(0,0,0,.06); transition: box-shadow 220ms ease, transform 220ms ease; } .ds-card:hover { box-shadow: 0 2px 4px rgba(0,0,0,.05), 0 20px 44px rgba(0,0,0,.09); transform: translateY(-2px); } .ds-card-title { margin: 0 0 6px; font: 700 1.6rem/1.1 -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; letter-spacing: -0.03em; color: var(--ink, #1d1d1f); } .ds-card-body { margin: 0; font: 400 0.8125rem/1.6 -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; color: var(--muted, #6e6e73); }"
+    },
+    {
+      "name": "Live Power Tile",
+      "kind": "custom",
+      "refersTo": "stat-live",
+      "description": "Signature green gradient tile for the live reading; the only coloured tile.",
+      "html": "<article class=\"ds-live\"><div class=\"ds-live-label\">Power right now</div><div class=\"ds-live-number\">2,057.7<small>W</small></div><div class=\"ds-live-foot\">Live simulated consumption</div></article>",
+      "css": ".ds-live { width: 240px; padding: 24px 26px; border-radius: 28px; color: #fff; background: linear-gradient(150deg, #13a86a 0%, #0b7a4b 45%, #06552f 100%); box-shadow: 0 16px 40px rgba(11,122,75,.28); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; } .ds-live-label { font-size: 0.6875rem; font-weight: 600; opacity: .9; } .ds-live-number { margin: 14px 0 10px; font-weight: 700; font-size: 2.6rem; letter-spacing: -0.05em; line-height: 1; } .ds-live-number small { font-size: .9rem; font-weight: 500; margin-left: 4px; letter-spacing: 0; } .ds-live-foot { font-size: 0.75rem; opacity: .85; }"
+    },
+    {
+      "name": "Provenance Badges",
+      "kind": "chip",
+      "refersTo": "badge-real",
+      "description": "Factual data-source badges: green = real, violet = synthetic, white = baseline.",
+      "html": "<div class=\"ds-badges\"><span class=\"ds-badge ds-real\">TESTED ON REAL DATA</span><span class=\"ds-badge ds-synthetic\">TRAINED ON SYNTHETIC DATA</span><span class=\"ds-badge ds-none\">BASELINE &middot; NO TRAINING</span></div>",
+      "css": ".ds-badges { display: flex; flex-wrap: wrap; gap: 8px; } .ds-badge { padding: 5px 12px; border-radius: 999px; font: 700 0.6875rem/1.4 -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; letter-spacing: .08em; } .ds-real { background: #0b7a4b; color: #fff; } .ds-synthetic { background: #6e3fa3; color: #fff; } .ds-none { background: #fff; color: #6e6e73; box-shadow: inset 0 0 0 1px #e5e5ea; }"
+    },
+    {
+      "name": "Select Field",
+      "kind": "input",
+      "refersTo": "input-select",
+      "description": "Borderless grey-fill select, 12px radius.",
+      "html": "<select class=\"ds-select\" aria-label=\"Chart time range\"><option>Last 300 readings</option><option>Last 3,600 readings</option></select>",
+      "css": ".ds-select { border: 0; background: var(--fill, #e8e8ed); color: var(--ink, #1d1d1f); border-radius: 12px; padding: 10px 14px; font: 500 0.8125rem/1.2 -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; } .ds-select:focus-visible { outline: 3px solid var(--green, #0b7a4b); outline-offset: 2px; }"
+    },
+    {
+      "name": "Navigation Item",
+      "kind": "nav",
+      "description": "Sidebar item on translucent paper; ink wash on hover.",
+      "html": "<nav class=\"ds-nav\"><a class=\"ds-nav-item\" href=\"#\">Overview</a><a class=\"ds-nav-item\" href=\"#\">Experiments</a><a class=\"ds-nav-item\" href=\"#\">Sessions</a></nav>",
+      "css": ".ds-nav { display: grid; gap: 2px; width: 200px; padding: 8px; background: rgba(245,245,247,.78); backdrop-filter: blur(22px) saturate(1.15); border-radius: 16px; } .ds-nav-item { display: block; padding: 13px 12px; border-radius: 12px; color: var(--muted, #6e6e73); text-decoration: none; font: 500 0.8125rem/1 -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; transition: background-color 180ms ease; } .ds-nav-item:hover { background: rgba(0,0,0,.05); color: var(--ink, #1d1d1f); } .ds-nav-item:focus-visible { outline: 3px solid var(--green, #0b7a4b); outline-offset: 2px; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Honest Showroom",
+    "overview": "Current borrows the calm of an Apple product page: generous air, one enormous headline, product shots floating on soft grey, and controls that feel like pebbles under the thumb. The showroom polish is a means, not the message. What is on display is evidence: a live home's power, and a candid record of what the appliance-detection models got right and wrong. The polish earns attention, and the honesty keeps it.\n\nThe mood is calm, precise and candid. Surfaces are quiet: grey paper, borderless white cards and a single green voice. Precision lives in the numbers, set large, bold and tightly tracked. Candour lives in labelling: real versus synthetic is always a coloured badge, and every chart sits on its own white surface with plain-language text beside it. Density is moderate. The dashboard shows a lot, but every section breathes, and nothing is decoration.\n\nIt must never read as a generic admin template: no bordered grey boxes, no cramped utility sidebar full of tiny links, and no stock SaaS card grid. If a screen could be dropped into any Bootstrap dashboard unchanged, it has drifted.",
+    "keyCharacteristics": [
+      "A grey paper canvas with borderless white cards, softly lifted.",
+      "One display headline per page, very large and very tight.",
+      "Big bold metrics, with small calm labels above them.",
+      "Current Green is the only accent; violet appears only to mean \"synthetic\".",
+      "Fully rounded pill controls with grey fills instead of outlines.",
+      "Product-shot illustrations on transparent backgrounds, floating on soft plates.",
+      "Evidence charts on white, never animated.",
+      "Light and true-black dark themes are equal citizens."
+    ],
+    "rules": [
+      {
+        "name": "The Provenance Rule",
+        "section": "colors",
+        "body": "Green means real or live; violet means synthetic. A badge colour is a factual claim about where data came from. Never use either as decoration, and never swap them."
+      },
+      {
+        "name": "The One Green Voice Rule",
+        "section": "colors",
+        "body": "Current Green is the only UI accent. It marks the single primary action on a screen, the live-power tile, real-data badges and the brand. If two green buttons compete in one view, one of them should be secondary grey."
+      },
+      {
+        "name": "The Evidence Palette Rule",
+        "section": "colors",
+        "body": "Chart colours are reserved for data and never leak into UI chrome. UI colours never enter charts."
+      },
+      {
+        "name": "The One Loud Headline Rule",
+        "section": "typography",
+        "body": "Only the display headline is enormous. Section headlines stay at Headline size, so the hero keeps its authority."
+      },
+      {
+        "name": "The Big Number Rule",
+        "section": "typography",
+        "body": "Numbers the viewer came for are set in Metric weight with tight tracking. Their units sit smaller beside them."
+      },
+      {
+        "name": "The Borderless Card Rule",
+        "section": "elevation",
+        "body": "Cards never carry borders. Separation comes from paper versus surface plus the ambient shadow. Hairlines belong inside tables and around charts only. When transparency is reduced or contrast increased, shadows give way to a 1 px hairline outline."
+      },
+      {
+        "name": "The Glass-Is-For-Navigation Rule",
+        "section": "elevation",
+        "body": "Translucent blur (the 22 px sidebar and top bar) is only for navigation chrome. Evidence surfaces stay solid."
+      }
+    ],
+    "dos": [
+      "Do keep the canvas Paper (#f5f5f7) and every card white, borderless and softly lifted.",
+      "Do keep one display headline per page, and give its key phrase the green gradient (#0b7a4b → #17b26a → #0a8f8a; brighter greens in dark mode).",
+      "Do label every result's provenance with the badge pair: green for real, violet for synthetic.",
+      "Do set numbers in Metric weight with tight tracking, and keep labels small and quiet above them.",
+      "Do make every button a pill: one Current Green primary, and grey-fill secondaries.",
+      "Do put new illustrations on transparent backgrounds so they float on Paper plates in both themes.",
+      "Do honour reduced motion (no hover lift, no press scale) and reduced transparency or increased contrast (opaque navigation, hairline outlines instead of shadows)."
+    ],
+    "donts": [
+      "Don't make it look like a generic admin template: no bordered grey boxes, no dense link-farm sidebars, no stock SaaS card grids.",
+      "Don't put borders on cards, or add a second UI accent colour beyond Current Green.",
+      "Don't use Synthetic Violet or the chart colours for anything except what they mean.",
+      "Don't animate charts or count numbers up. Evidence appears at rest.",
+      "Don't apply glass blur to evidence surfaces. It is for navigation only.",
+      "Don't set new text below 11 px. The existing 10 px captions (stat footers, panel subtitles) are drift to fix, not precedent."
+    ]
+  }
+}
