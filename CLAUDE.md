@@ -24,8 +24,13 @@ Read this first in every session. **Product truth** is in `PRODUCT.md`, the
 - **One change at a time.** Simulator changes are opt-in versions (`fridge=`,
   `washer=`, `microwave=`, `background='v2'`). v1 output stays byte-identical
   (golden hashes in `test_realistic.py`).
-- **REFIT House 5 is spent** (scored once, `docs/final-test.md`). Any new final
-  test needs a fresh sealed house.
+- **REFIT House 5 is spent** (scored once, `docs/final-test.md`).
+- **REFIT House 11 is SEALED** (`docs/sealed-house-11.md`, files in
+  `data/sealed/`). Never parse it, summarise it or look at its values until a
+  final-test protocol naming frozen model hashes is committed. Hash and
+  row-count checks only.
+- **Zenodo record 5063428 has only Houses 1–5 and 11.** Other REFIT houses need
+  the full Strathclyde archive; ask before downloading it.
 - **Data handling:**
   - Preserve timestamps and gaps.
   - Blank means unknown, not zero.
