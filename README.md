@@ -3,7 +3,7 @@
 **Current shows a home's live electricity use and tests, honestly, whether machine
 learning can tell which appliances are running from the total power alone.**
 
-![The Current dashboard: live power, appliance cards and the experiment workbench](docs/img/dashboard.webp)
+![The Current dashboard: hero, live power stats, the power chart and the simulation lab](docs/img/dashboard.webp)
 
 It is a household energy lab: a realistic simulator and real recordings from the
 public [REFIT dataset](https://zenodo.org/records/5063428)
