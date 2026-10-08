@@ -100,7 +100,15 @@ visibility work (README, report, showcase, MIT license). Open:
 4. **Step 17 (ESP32):** the builder is buying an AITRIP ESP32-WROOM-32 (USB-C,
    CP2102). Write a starter Arduino sketch (Wi-Fi, NTP, batched POSTs to
    `/api/sensor/readings` with the token).
-5. **Later research:**
+5. **Calibration experiment (by January 2027):** preregister "simulator timing
+   plus per-home power calibration".
+   - **Leading design:** label-free. The ON-power level is the median jump in
+     the aggregate at predicted switch-ons.
+   - **Develop** with Houses 1–5 (leave-one-house-out), then **score** sealed
+     House 11 once.
+   - Optionally ask the builder about longer slices (about a week per house,
+     roughly 12 MB each).
+6. **Later research:**
    - leave-one-house-out across more REFIT houses;
    - a seq2point baseline via NILMTK;
    - smart-plug real data with no mains work;
