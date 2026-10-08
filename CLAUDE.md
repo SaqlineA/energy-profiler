@@ -79,19 +79,16 @@ from `/docs`. To preview, serve `docs/` over HTTP (for example
 The roadmap is the builder's 21 steps. Done: Steps 1–16, plus Phase 1
 visibility work (README, report, showcase, MIT license). Open:
 
-1. **Showcase second-round fixes:** applied in `8ad4f6a` but not yet
-   re-captured. Re-run the finish-review verdict, then record the showcase type
-   roles and `#7d52a3` in `DESIGN.md`.
-2. **Author name:** ask the builder whether to replace "SaqlineA" with their
+1. **Author name:** ask the builder whether to replace "SaqlineA" with their
    real name on the paper and site.
-3. **Going public:** the builder makes the repo public, then enables Pages
+2. **Going public:** the builder makes the repo public, then enables Pages
    (branch `codex/online-workspace`, folder `/docs`). Then tag `v1.0`.
-4. **Resume:** update the resume project section (`resume.html`, local only)
+3. **Resume:** update the resume project section (`resume.html`, local only)
    after the builder confirms.
-5. **Step 17 (ESP32):** the builder is buying an AITRIP ESP32-WROOM-32 (USB-C,
+4. **Step 17 (ESP32):** the builder is buying an AITRIP ESP32-WROOM-32 (USB-C,
    CP2102). Write a starter Arduino sketch (Wi-Fi, NTP, batched POSTs to
    `/api/sensor/readings` with the token).
-6. **Later research:**
+5. **Later research:**
    - leave-one-house-out across more REFIT houses;
    - a seq2point baseline via NILMTK;
    - smart-plug real data with no mains work;
