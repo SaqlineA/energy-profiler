@@ -103,12 +103,19 @@
       ['v4r · relative · RF', 0.439], ['v4r · relative · DT', 0.781, true], ['Always off', 0]], 'F1 on the development house (House 2)'),
       cap: 'Table 1 as a chart. Only one change per run; the v4r Decision Tree was chosen before House 5 was opened.' },
     'final-test': { img: 'img/house5-figure.webp', alt: 'House 5: 36 real fridge ON periods above 257 short predicted bursts, and the prediction error', cap: 'House 5, scored once: 36 real fridge cycles vs 257 short guesses, and the error over about 17 hours.' },
+    'cross-house': { svg: () => bars([
+      ['House 1 · real', 0.358], ['House 1 · simulator', 0.280, false, true],
+      ['House 2 · real', 0.520], ['House 2 · simulator', 0.874, false, true],
+      ['House 3 · real', 0.377], ['House 3 · simulator', 0.631, false, true],
+      ['House 4 · real', 0.339], ['House 4 · simulator', 0.360, false, true],
+      ['House 5 · real', 0.450], ['House 5 · simulator', 0.686, false, true]], 'F1 with each house held out once'),
+      cap: 'Table 3 as a chart. Violet marks the simulator-trained model; it detected the fridge better in 4 of 5 houses.' },
     discussion: { svg: () => bars([
       ['Development house, real training', 0.781], ['Sealed house, real training', 0.297, true], ['Sealed house, simulator training', 0.686, false, true]],
       'F1: the development score did not transfer'), cap: 'Violet marks a model trained on simulated homes.' },
     'next-steps': { trio: true, cap: 'Next: more homes, a published baseline, a fresh sealed house, and safely collected data of my own.' },
   };
-  const ids = ['abstract', 'background', 'system', 'method', 'development', 'final-test', 'discussion', 'next-steps', 'references'];
+  const ids = ['abstract', 'background', 'system', 'method', 'development', 'final-test', 'cross-house', 'discussion', 'next-steps', 'references'];
 
   function svgBox(viewBox, label) {
     const svg = el('svg', { viewBox, role: 'img', 'aria-label': label });

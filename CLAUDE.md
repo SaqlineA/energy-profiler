@@ -39,6 +39,11 @@ Read this first in every session. **Product truth** is in `PRODUCT.md`, the
   - **Development, House 2:** Decision Tree F1 0.781.
   - **Sealed House 5:** F1 0.297.
   - **Simulator-trained model on House 5:** F1 0.686.
+- Leave-one-house-out, Houses 1–5 (`docs/cross-house.md`, run once):
+  - real-trained F1 0.339–0.520 (mean 0.409); it transfers reliably in only
+    2 of 5 homes.
+  - The simulator model detects better in 4 of 5 homes (mean 0.566) but often
+    has worse power error.
 - Washer (synthetic): Random Forest with 5-reading windows, F1 0.70. An
   8-minute window hurt.
 
@@ -46,7 +51,7 @@ Read this first in every session. **Product truth** is in `PRODUCT.md`, the
 
 ```powershell
 .\.venv\Scripts\python.exe app.py                      # dashboard at http://127.0.0.1:8000
-.\.venv\Scripts\python.exe -m unittest -q              # 78 tests
+.\.venv\Scripts\python.exe -m unittest -q              # 80 tests
 .\.venv\Scripts\python.exe -m unittest discover -s research -q
 node --check static/app.js; node --check static/experiments.js; node --check docs/site.js
 .\.venv\Scripts\python.exe sensor_client.py --start    # ESP32 stand-in
@@ -79,8 +84,10 @@ from `/docs`. To preview, serve `docs/` over HTTP (for example
 The roadmap is the builder's 21 steps. Done: Steps 1–16, plus Phase 1
 visibility work (README, report, showcase, MIT license). Open:
 
-1. **Author name:** ask the builder whether to replace "SaqlineA" with their
-   real name on the paper and site.
+1. **Professor outreach (Nov–Dec 2026):** the goal is a faculty mentor and a
+   poster at the BMCC Research Symposium (May 2027). See the "IMPORTANT
+   TIMELINE" session and the builder's transfer-plan doc. Keep the public site
+   under "SaqlineA": the builder said no real name publicly.
 2. **Going public:** the builder makes the repo public, then enables Pages
    (branch `codex/online-workspace`, folder `/docs`). Then tag `v1.0`.
 3. **Resume:** update the resume project section (`resume.html`, local only)

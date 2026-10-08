@@ -20,8 +20,12 @@ protocol, model and pass/fail rule, and kept one REFIT house (House 5) unscored.
 The best development model, trained on three real houses, reached F1 0.781 on a
 fourth house. On the untouched House 5 it fell to **F1 0.297**. A model trained
 only on simulated homes scored **F1 0.686** on the same house. Both models
-underestimated fridge energy by 34–41%. The main lesson is methodological: a
-single development house badly overstated real-world performance.
+underestimated fridge energy by 34–41%. A follow-up leave-one-house-out test
+across Houses 1–5, also preregistered, found the same pattern in general: with
+real training, F1 ranged from 0.339 to 0.520 depending on the held-out house, and
+the simulator model detected the fridge better in 4 of 5 houses. Its power
+estimates, though, were often worse. The main lesson is methodological: a single
+development house badly overstated real-world performance.
 
 ## 1. Background and question
 
@@ -50,7 +54,7 @@ HTML/CSS/JavaScript dashboard.
   model input.
 - **Real timestamps and gaps are kept.** Nothing is interpolated, and a blank
   label means unknown, not zero.
-- **Test coverage.** 78 automated tests cover timing, energy integration,
+- **Test coverage.** 80 automated tests cover timing, energy integration,
   storage, experiment provenance, the simulators and the sensor interface.
 - **Sensor-ready.** A local endpoint accepts batched readings from a future
   ESP32 device with token authentication. No physical sensor has been
@@ -151,7 +155,44 @@ synthetic model.
 - **Bottom chart:** the prediction error. The model underestimates during every
   real cycle and overestimates between cycles.
 
-## 6. Discussion
+## 6. Follow-up: every house held out once
+
+A single test house cannot separate a general pattern from a quirk of that
+house. So I preregistered a second test (protocol committed before running).
+- **Rotation:** each of Houses 1–5 is held out in turn, and a Decision Tree
+  with the frozen v4r settings is trained on the other four.
+- **Comparison:** each fold also scores the frozen simulator model and Always
+  off on identical windows.
+
+This measures how much results vary between homes. It is not a sealed test:
+House 2 chose the settings and House 5 had been scored before.
+
+| Held-out house | Real F1 | Simulator F1 | Real MAE (W) | Simulator MAE (W) | Always-off MAE (W) |
+|---|---:|---:|---:|---:|---:|
+| 1 | **0.358** | 0.280 | 26.9 | 40.0 | **15.7** |
+| 2 | 0.520 | **0.874** | 15.0 | **14.8** | 28.3 |
+| 3 | 0.377 | **0.631** | 44.9 | 56.0 | **43.9** |
+| 4 | 0.339 | **0.360** | 34.2 | 82.5 | **11.2** |
+| 5 | 0.450 | **0.686** | **38.9** | 39.4 | 48.5 |
+| Mean | 0.409 | 0.566 | | | |
+
+**Table 3.** Leave-one-house-out fridge detection, 3,687–4,368 windows per
+house.
+
+**Verdict (preregistered rules).**
+- **Transfer:** real training did **not** transfer reliably. It beat Always off
+  on both F1 and MAE in only 2 of 5 houses.
+- **Simulator vs real:** the simulator advantage **held** for detection, with a
+  higher F1 in 4 of 5 houses.
+- **But not for power:** the simulator's power error was the worst of the three
+  models in Houses 1, 3 and 4, and it overestimated House 4's fridge energy
+  7.7-fold.
+
+**Takeaways.** The simulator seems to teach *when* a fridge runs better than
+*how much* power it draws. The real-training score also moved with the choice
+of training houses: adding House 5 cut House 2 from 0.781 to 0.520.
+
+## 7. Discussion
 
 **The development score did not transfer.** Recall fell from 71% on House 2 to
 20% on House 5. Choosing a model after five comparisons on a single development
@@ -182,10 +223,11 @@ models.
 - Nothing has been validated on a physical sensor.
 - Scores are uncalibrated, and no prediction passed the uncertainty heuristic.
 
-## 7. Next steps
+## 8. Next steps
 
-1. **Leave-one-house-out evaluation** across more of REFIT's 20 houses, instead
-   of a single development house.
+1. **Extend leave-one-house-out** from five houses to more of REFIT's 20 houses
+   and longer slices. Then test a preregistered idea from Section 6: simulator
+   training for timing, plus a small per-home power calibration.
 2. **A published baseline,** such as sequence-to-point learning (Zhang et al., 2018)
    through NILMTK (Batra et al., 2014), so these numbers can be compared with
    known methods.
