@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Current — Can a model tell which appliance is running?</title>
+  <meta name="description" content="Current is an open-source household energy lab. It tests, honestly, whether machine learning can tell which appliances are running from a home's total power.">
+  <meta name="theme-color" content="#f5f5f7" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
+  <meta property="og:title" content="Current — Energy Profiler">
+  <meta property="og:description" content="Worked on one house (F1 0.781). Fell to 0.297 on a sealed one. A simulator-trained model did better. An honest NILM lab.">
+  <meta property="og:image" content="https://saqlinea.github.io/energy-profiler/img/hero.webp">
+  <link rel="stylesheet" href="site.css">
+  <script>if (!matchMedia('(prefers-reduced-motion: reduce)').matches) document.documentElement.classList.add('intro');</script>
+  <script src="site.js" defer></script>
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+  <header class="nav">
+    <div class="wrap">
+      <a class="wordmark" href="./" aria-label="Current home">
+        <svg viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="9" fill="#0b7a4b"/><path d="M18.5 5 9.5 18h6l-2 9 9-13h-6z" fill="#fff"/></svg>
+        <span>current<b>.</b></span>
+      </a>
+      <ul>
+        <li class="optional"><a href="#problem">The problem</a></li>
+        <li><a href="#findings">Findings</a></li>
+        <li class="optional"><a href="#system">How it works</a></li>
+        <li class="keep"><a href="paper.html">Paper</a></li>
+        <li class="keep"><a class="pill secondary small" href="https://github.com/SaqlineA/energy-profiler">GitHub</a></li>
+      </ul>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="hero" aria-labelledby="hero-title">
+      <div class="wrap">
+        <div class="hero-copy">
+          <h1 id="hero-title">Your home, <em>in watts.</em></h1>
+          <p class="lead">Current watches a home's total electricity and asks a hard question: <strong>can a model tell which appliance is running?</strong> I tested it on real houses, honestly, including where it failed.</p>
+          <div class="actions">
+            <a class="pill primary" href="#findings">See the findings</a>
+            <a class="pill secondary" href="paper.html">Read the paper</a>
+          </div>
+          <p class="credits">Open source · Python, FastAPI, scikit-learn · real data from the REFIT study</p>
+        </div>
+        <figure class="house" aria-label="Illustration of a house whose fridge, lamp and washing machine draw power from one meter">
+          <img src="img/hero.webp" alt="" width="1047" height="1096" fetchpriority="high">
+          <img class="flow" src="img/hero-lines.webp" alt="" width="1047" height="1096">
+          <span class="tag" style="left:49%;top:24%"><i></i>Lamp <span>~20 W</span></span>
+          <span class="tag" style="left:2%;top:52%"><i></i>Fridge <span>~85 W, cycling</span></span>
+          <span class="tag" style="left:66%;top:62%"><i></i>Washer <span>2 kW heating</span></span>
+        </figure>
+      </div>
+    </section>
+
+    <section class="block tight" id="problem" aria-labelledby="problem-title">
+      <div class="wrap">
+        <div class="section-head">
+          <h2 id="problem-title">Your meter doesn't see appliances. It sees one wire.</h2>
+          <p>Each appliance has its own rhythm: the fridge cycles, the lamp holds steady, the washer heats in a long block. By the time they reach the meter they are a single line. Pulling them apart again from that line is called non-intrusive load monitoring (NILM).</p>
+        </div>
+        <div class="plate wire" id="wire">
+          <svg role="img" aria-labelledby="wire-title wire-desc">
+            <title id="wire-title">Three appliance signals merge into one total</title>
+            <desc id="wire-desc">A fridge cycling on and off, a lamp drawing steady power and a washing machine heating, flicking and spinning add up to the one total line the meter records.</desc>
+          </svg>
+          <p class="caption">Illustration of the idea, not measured data. Real recordings are noisier, and many more loads overlap.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="block" id="findings" aria-labelledby="findings-title">
+      <div class="wrap">
+        <div class="section-head">
+          <h2 id="findings-title">It worked on one house. Then I tested a sealed one.</h2>
+          <p>I trained on three real homes from the REFIT study, tuned on a fourth, and kept a fifth sealed. I wrote the test down before opening it, and scored it exactly once.</p>
+        </div>
+        <div class="verdict">
+          <div class="plate">
+            <ul class="bars" aria-label="Fridge detection F1 scores">
+              <li class="dev"><span class="what">Development house <small>House 2 · trained on real houses</small></span><span class="score">0.781</span><span class="track"><span style="width:78.1%"></span></span></li>
+              <li><span class="what">Sealed house <span class="badge">REAL TRAINING</span><small>House 5 · same model, scored once</small></span><span class="score">0.297</span><span class="track"><span style="width:29.7%"></span></span></li>
+              <li class="sim"><span class="what">Sealed house <span class="badge sim">SIMULATOR TRAINING</span><small>House 5 · trained only on simulated homes</small></span><span class="score">0.686</span><span class="track"><span style="width:68.6%"></span></span></li>
+              <li><span class="what">Always "off" <span class="badge none">NO SKILL</span><small>The baseline every model must beat</small></span><span class="score">0.000</span><span class="track"><span style="width:0%"></span></span></li>
+            </ul>
+            <p class="caption">F1 score for spotting when the fridge is on: 1.0 finds every ON period with no false alarms; 0 finds none.</p>
+          </div>
+          <div class="verdict-text">
+            <p>The score that looked strong on the development house <strong>did not survive</strong> the sealed one. And a model trained only on my simulator <strong>did better</strong> than the one trained on real homes.</p>
+            <p>Both models also underestimated the fridge's energy by 34–41%. The lesson is about method: one development house made the model look far better than it was.</p>
+            <p>Before any of this, the biggest fix wasn't the model at all. Uneven sensor timing left just <strong>8</strong> usable training windows; a simple, label-blind timing rule recovered <strong>4,368</strong>.</p>
+            <p><a href="paper.html#final-test">How the sealed test worked</a></p>
+          </div>
+        </div>
+        <figure class="plate figure-wide">
+          <img src="img/house5-figure.webp" alt="Top: 36 real fridge ON periods as evenly spaced green bars, above the model's 257 short scattered guesses. Bottom: prediction error, below zero during every real cycle and above zero between them." width="1081" height="573" loading="lazy">
+          <figcaption class="caption">The sealed house, from Current's own dashboard. Top: the fridge's 36 real ON periods against the model's 257 short guesses. Bottom: the model's error, underestimating during every real cycle.</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section class="block tight" id="system" aria-labelledby="system-title">
+      <div class="wrap">
+        <div class="section-head">
+          <h2 id="system-title">One pipeline, from simulator to sensor.</h2>
+          <p>Simulated homes, replayed REFIT recordings and a future ESP32 sensor all run through the same steps, so a result from one can be compared with another.</p>
+        </div>
+        <ol class="pipeline" aria-label="Data pipeline">
+          <li>Sources<small>simulator · REFIT · sensor</small></li>
+          <li class="arrow" aria-hidden="true"><svg viewBox="0 0 20 20"><path d="M4 10h11m-4-4 4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></li>
+          <li>Timing checks<small>gaps never filled in</small></li>
+          <li class="arrow" aria-hidden="true"><svg viewBox="0 0 20 20"><path d="M4 10h11m-4-4 4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></li>
+          <li>Features<small>past readings only</small></li>
+          <li class="arrow" aria-hidden="true"><svg viewBox="0 0 20 20"><path d="M4 10h11m-4-4 4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></li>
+          <li>Models<small>tree · forest · baseline</small></li>
+          <li class="arrow" aria-hidden="true"><svg viewBox="0 0 20 20"><path d="M4 10h11m-4-4 4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></li>
+          <li>Dashboard<small>with real vs simulated labels</small></li>
+        </ol>
+        <div class="screen">
+          <img src="img/workbench.webp" alt="Current's experiment workbench on the House 5 final test: TESTED ON REAL DATA and TRAINED ON REAL DATA badges, F1 0.297, MAE 38.9 W, a plain-language explanation of what went wrong" width="1000" height="456" loading="lazy">
+        </div>
+        <dl class="facts">
+          <div><dt>Written down first</dt><dd>Each experiment's plan and pass/fail rule went into Git before the experiment ran.</dd></div>
+          <div><dt>Scored once</dt><dd>The sealed house was opened a single time, after every model choice had been frozen.</dd></div>
+          <div><dt>78 automated tests</dt><dd>They cover timing, energy, storage, the simulators and the sensor link.</dd></div>
+          <div><dt>Sensor-ready</dt><dd>A token-protected endpoint is ready for an ESP32 board, though no hardware has been validated yet.</dd></div>
+        </dl>
+      </div>
+    </section>
+
+    <section class="block" id="next" aria-labelledby="next-title">
+      <div class="wrap">
+        <div class="section-head"><h2 id="next-title">What I'm doing next.</h2></div>
+        <ol class="next">
+          <li><strong>Test across many homes, not one</strong><span>Leave-one-house-out evaluation across more of REFIT's 20 houses.</span></li>
+          <li><strong>Compare with a published method</strong><span>Sequence-to-point learning through NILMTK, so the numbers sit next to known results.</span></li>
+          <li><strong>Seal a new test house</strong><span>House 5 has been used once; a fresh one keeps the next result honest.</span></li>
+          <li><strong>Collect my own data, safely</strong><span>Plug-in energy-monitoring smart plugs feeding Current's sensor endpoint. No mains wiring.</span></li>
+        </ol>
+      </div>
+    </section>
+
+    <section class="close" aria-labelledby="close-title">
+      <div class="wrap">
+        <h2 id="close-title">The full story is in the paper.</h2>
+        <p>Method, tables, the sealed test and its limits, in four pages.</p>
+        <div class="actions">
+          <a class="pill primary" href="paper.html">Read the paper</a>
+          <a class="pill secondary" href="report.pdf">
+            <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 3v10m-4-4 4 4 4-4M4 16h12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Download PDF
+          </a>
+          <a class="pill secondary" href="https://github.com/SaqlineA/energy-profiler">View the code</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wrap">
+      <span>Current — Energy Profiler · MIT licensed · by SaqlineA</span>
+      <span>Real data: REFIT study (Murray et al., 2017). Illustrations generated with Higgsfield; they are not photos of the measured appliances.</span>
+    </div>
+  </footer>
+</body>
+</html>
