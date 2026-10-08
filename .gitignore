@@ -17,3 +17,6 @@ notes.md
 # Personal files kept out of the public repo
 *Resume*.pdf
 resume*.html
+
+# Private outreach drafts (real name; sent by the builder, never committed)
+outreach/
