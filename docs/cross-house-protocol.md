@@ -82,3 +82,12 @@ identical windows:
 - **Weak simulator test for House 5:** House 5's fridge statistics never
   shaped the simulator v1, but the House 5 fold of R2 repeats the earlier
   result, so it is not new evidence on its own.
+
+## Correction (8 October 2026, after the run)
+
+The data section above says fridge truth comes from Appliance1 in every house.
+That is wrong for House 3. As documented in `docs/fridge-development.md`, House
+3's pinned file uses **Appliance2**, its fridge-freezer. The runner always used
+the pinned, hash-checked files, so the results are unaffected. Only this
+description was wrong. The text above is left unchanged as the preregistered
+record.

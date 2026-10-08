@@ -64,7 +64,7 @@ These were stated before the run:
   measures how much results vary between homes; it is not a sealed test.
 - Folds share training houses, so they are not independent trials.
 - Each house contributes about 22 hours, with no seasonal coverage.
-- Fridge truth is REFIT's Appliance1 fridge or fridge-freezer channel.
+- Fridge truth is each house's REFIT fridge or fridge-freezer channel: Appliance1, except Appliance2 in House 3.
 
 ## Next
 
