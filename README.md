@@ -11,7 +11,7 @@ go through the same pipeline into a live dashboard. Every experiment is written
 down before it runs, and every result says whether it was tested and trained on
 real or simulated data, including the results that went badly.
 
-📄 **[Read the 4-page report](docs/report.md)** ([PDF](docs/report.pdf)) ·
+📄 **[Read the report](docs/report.md)** ([PDF](docs/report.pdf)) ·
 🌐 **[Project page](docs/index.html)** · 🧪 [All experiment write-ups](#software-roadmap-real-data-experiments)
 
 ## Key findings
@@ -27,19 +27,22 @@ experiment. F1 rewards finding the appliance's ON periods without false alarms
 | **Same model on an unseen house (scored once)** | Tested on REFIT House 5 | **0.297** | The development score did not carry over |
 | Simulator-trained model, same unseen house | Simulated homes → House 5 | **0.686** | **The simulator beat the real-house training** |
 | Always-off baseline | House 5 | 0.000 | What "no skill" looks like |
+| Every house held out once (preregistered) | REFIT Houses 1–5, real training | **0.339–0.520** | The score depends heavily on which home is tested |
+| Same rotation, simulator-trained | Simulated homes → each of Houses 1–5 | **0.280–0.874** | Better detection in 4 of 5 homes, but often worse power estimates |
 | Washing-machine detection (synthetic) | Simulated homes | 0.701 | Finds most heating, misses low-power phases |
 
 Full numbers, methods and limits: [final test](docs/final-test.md) ·
+[every-house follow-up](docs/cross-house.md) ·
 [fridge development v1–v4](docs/fridge-development.md) ·
 [washer experiment](docs/washer-experiment.md).
 
 **Limits.** These are bounded REFIT slices (about a day per house for the model tests), with one
-seed and a single held-out house. Nothing here has been validated on a physical
+seed and five houses. Nothing here has been validated on a physical
 sensor. This is a learning and research project, not a billing meter or safety
 device.
 
 **Built with** Python, FastAPI, SQLite, scikit-learn, and plain HTML/CSS/JS (no
-frontend build step). It has 78 automated tests.
+frontend build step). It has 80 automated tests.
 
 ## Software roadmap: real-data experiments
 

@@ -90,7 +90,8 @@
             <p>The score that looked strong on the development house <strong>did not survive</strong> the sealed one. And a model trained only on my simulator <strong>did better</strong> than the one trained on real homes.</p>
             <p>Both models also underestimated the fridge's energy by 34–41%. The lesson is about method: one development house made the model look far better than it was.</p>
             <p>Before any of this, the biggest fix wasn't the model at all. Uneven sensor timing left just <strong>8</strong> usable training windows; a simple, label-blind timing rule recovered <strong>4,368</strong>.</p>
-            <p><a href="paper.html#final-test">How the sealed test worked</a></p>
+            <p>So I held out every house in turn, with the plan written down first. Real-trained scores ranged from <strong>0.339 to 0.520</strong> depending on the home, and the simulator model detected the fridge better in <strong>4 of 5</strong> homes, though its power estimates were often worse.</p>
+            <p><a href="paper.html#final-test">How the sealed test worked</a> · <a href="paper.html#cross-house">Every house held out</a></p>
           </div>
         </div>
         <figure class="plate figure-wide">
@@ -123,7 +124,7 @@
         <dl class="facts">
           <div><dt>Written down first</dt><dd>Each experiment's plan and pass/fail rule went into Git before the experiment ran.</dd></div>
           <div><dt>Scored once</dt><dd>The sealed house was opened a single time, after every model choice had been frozen.</dd></div>
-          <div><dt>78 automated tests</dt><dd>They cover timing, energy, storage, the simulators and the sensor link.</dd></div>
+          <div><dt>80 automated tests</dt><dd>They cover timing, energy, storage, the simulators and the sensor link.</dd></div>
           <div><dt>Sensor-ready</dt><dd>A token-protected endpoint is ready for an ESP32 board, though no hardware has been validated yet.</dd></div>
         </dl>
       </div>
@@ -133,7 +134,7 @@
       <div class="wrap">
         <div class="section-head"><h2 id="next-title">What I'm doing next.</h2></div>
         <ol class="next">
-          <li><strong>Test across many homes, not one</strong><span>Leave-one-house-out evaluation across more of REFIT's 20 houses.</span></li>
+          <li><strong>Test across even more homes</strong><span>Five houses are done; next, more of REFIT's 20 houses and longer recordings.</span></li>
           <li><strong>Compare with a published method</strong><span>Sequence-to-point learning through NILMTK, so the numbers sit next to known results.</span></li>
           <li><strong>Seal a new test house</strong><span>House 5 has been used once; a fresh one keeps the next result honest.</span></li>
           <li><strong>Collect my own data, safely</strong><span>Plug-in energy-monitoring smart plugs feeding Current's sensor endpoint. No mains wiring.</span></li>
@@ -144,7 +145,7 @@
     <section class="close" aria-labelledby="close-title">
       <div class="wrap">
         <h2 id="close-title">The full story is in the paper.</h2>
-        <p>Method, tables, the sealed test and its limits, in four pages.</p>
+        <p>Method, tables, the sealed test, the every-house follow-up and their limits, in a short paper.</p>
         <div class="actions">
           <a class="pill primary" href="paper.html">Read the paper</a>
           <a class="pill secondary" href="report.pdf">
