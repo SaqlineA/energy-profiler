@@ -148,3 +148,33 @@ select, input { border: 0; background-color: var(--fill); border-radius: 12px; c
 .hero-actions .export { margin-top: 0; padding: 12px 24px; font-size: .9375rem; }
 .hero-actions .export span { display: inline; }
 @media (max-width: 900px) { .page-heading.hero { padding-bottom: 250px; } }
+
+/* Motion (2026-10): energy flows through the hero house; the page enters once. Charts and numbers stay still. */
+.hero-art.hero-flow {
+  background: url('/static/img/hero-lines.webp') center / contain no-repeat;
+  filter: drop-shadow(0 0 6px rgba(48, 209, 88, .85)) brightness(1.25);
+  -webkit-mask-image: linear-gradient(to top, transparent 0%, #000 12%, #000 22%, transparent 34%);
+          mask-image: linear-gradient(to top, transparent 0%, #000 12%, #000 22%, transparent 34%);
+  -webkit-mask-size: 100% 300%; mask-size: 100% 300%;
+  -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
+  animation: energy-flow 3.6s linear infinite;
+}
+@keyframes energy-flow {
+  from { -webkit-mask-position: 0 0%; mask-position: 0 0%; }
+  to { -webkit-mask-position: 0 100%; mask-position: 0 100%; }
+}
+.intro .page-heading.hero > div:not(.hero-art) > * { animation: enter .9s cubic-bezier(.16, 1, .3, 1) backwards; }
+.intro .page-heading.hero > div:not(.hero-art) > :nth-child(2) { animation-delay: .08s; }
+.intro .page-heading.hero > div:not(.hero-art) > :nth-child(3) { animation-delay: .16s; }
+.intro .page-heading.hero > div:not(.hero-art) > :nth-child(4) { animation-delay: .24s; }
+.intro .hero-art { animation: enter 1.2s cubic-bezier(.16, 1, .3, 1) .1s backwards; }
+.intro .hero-art.hero-flow { animation: enter 1.2s cubic-bezier(.16, 1, .3, 1) .1s backwards, energy-flow 3.6s linear 1.3s infinite; }
+.intro .stats .stat { animation: enter .8s cubic-bezier(.16, 1, .3, 1) backwards; }
+.intro .stats .stat:nth-child(1) { animation-delay: .35s; }
+.intro .stats .stat:nth-child(2) { animation-delay: .42s; }
+.intro .stats .stat:nth-child(3) { animation-delay: .49s; }
+.intro .stats .stat:nth-child(4) { animation-delay: .56s; }
+@keyframes enter { from { opacity: 0; transform: translateY(14px) scale(.98); } }
+@media (prefers-reduced-motion: reduce) {
+  .hero-art.hero-flow { -webkit-mask-image: none; mask-image: none; opacity: .5; animation: none; }
+}
