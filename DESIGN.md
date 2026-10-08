@@ -250,6 +250,21 @@ headlines stay at Headline size, so the hero keeps its authority.
 **The Big Number Rule.** Numbers the viewer came for are set in Metric weight
 with tight tracking. Their units sit smaller beside them.
 
+### Showcase site (docs/)
+The public pages (`docs/index.html`, `docs/paper.html`, styled by
+`docs/site.css`) tell a story, so they are scaled up from the dashboard:
+- **Showcase Display** (700, clamp(3rem, 7.2vw, 5.75rem), 0.98, −0.04em): the
+  landing hero only, with "in watts." in solid Current Green.
+- **Story Headline** (700, clamp(2.1rem, 4.6vw, 3.6rem), 1.04, −0.035em): each
+  landing section. This is the one deliberate exception to the One Loud
+  Headline Rule: an Apple-style product page gives every chapter a headline.
+- **Paper Title** (700, clamp(2.2rem, 4.8vw, 3.9rem)) and **Paper Section**
+  (700, 1.6rem) on the paper page.
+- **Score** (700, 1.9rem, −0.04em, tabular figures): the F1 numbers.
+- **Text steps:** 1.25rem (verdict and closing lead), 1.0625rem (row titles,
+  facts, quotes), 0.8125rem (captions, nav, footer, tables), 0.75rem (tags,
+  badges, pipeline notes). Do not add sizes in between.
+
 ## Layout
 
 A fixed 242 px translucent sidebar sits on the left, with the content column
