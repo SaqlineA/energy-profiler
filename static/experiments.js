@@ -219,6 +219,13 @@
     $('washer-status').textContent = `Experimental washer: ${number(washer?.watts)} W · Stage ${washer?.stage || 'unknown'} · ${number(washer?.energy_kwh == null ? null : washer.energy_kwh * 1000)} Wh. Original live model has no washer output; see the four-device experiment for estimates.`;
     renderControls(); if (!selected) draw();
   }};
-  history().catch(e => { $('experiment-note').textContent = e.message; });
+  // Shareable link: /?report=<id>#research opens that saved experiment.
+  const linked = new URLSearchParams(location.search).get('report');
+  history().then(() => {
+    if (linked && /^[0-9a-f]{32}$/.test(linked)) {
+      $('experiment-view').value = linked;
+      return selectReport(linked).then(() => $('research').scrollIntoView());
+    }
+  }).catch(e => { $('experiment-note').textContent = e.message; });
   sessions(); showReport(); renderControls();
 })();

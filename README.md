@@ -1,9 +1,45 @@
 # Current — Energy Profiler
 
-A local learning project: simulator or recorded household data → causal appliance
-inference → SQLite → live dashboard. No hardware, cloud account, GPU, or frontend
-build tools required. **The bundled data is synthetic; real-household accuracy
-has not been established.**
+**Current shows a home's live electricity use and tests, honestly, whether machine
+learning can tell which appliances are running from the total power alone.**
+
+![The Current dashboard: live power, appliance cards and the experiment workbench](docs/img/dashboard.webp)
+
+It is a household energy lab: a realistic simulator and real recordings from the
+public [REFIT dataset](https://zenodo.org/records/5063428)
+go through the same pipeline into a live dashboard. Every experiment is written
+down before it runs, and every result says whether it was tested and trained on
+real or simulated data, including the results that went badly.
+
+📄 **[Read the 4-page report](docs/report.md)** ([PDF](docs/report.pdf)) ·
+🌐 **[Project page](docs/index.html)** · 🧪 [All experiment write-ups](#software-roadmap-real-data-experiments)
+
+## Key findings
+
+Refrigerator detection from whole-house power (REFIT), plus one synthetic washer
+experiment. F1 rewards finding the appliance's ON periods without false alarms
+(1.0 is perfect, 0 means it never finds them).
+
+| Result | Data | F1 | What it means |
+|---|---|---:|---|
+| Fixed a timing bug before any modelling | REFIT House 1 | — | Only 8 usable windows at 8 s; a label-blind 16 s rule gave 4,368 |
+| Best model on the development house | Trained on REFIT Houses 1, 3, 4 → tested on House 2 | **0.781** | Looked like a working fridge detector |
+| **Same model on an unseen house (scored once)** | Tested on REFIT House 5 | **0.297** | The development score did not carry over |
+| Simulator-trained model, same unseen house | Simulated homes → House 5 | **0.686** | **The simulator beat the real-house training** |
+| Always-off baseline | House 5 | 0.000 | What "no skill" looks like |
+| Washing-machine detection (synthetic) | Simulated homes | 0.701 | Finds most heating, misses low-power phases |
+
+Full numbers, methods and limits: [final test](docs/final-test.md) ·
+[fridge development v1–v4](docs/fridge-development.md) ·
+[washer experiment](docs/washer-experiment.md).
+
+**Limits.** These are bounded REFIT slices (about a day per house for the model tests), with one
+seed and a single held-out house. Nothing here has been validated on a physical
+sensor. This is a learning and research project, not a billing meter or safety
+device.
+
+**Built with** Python, FastAPI, SQLite, scikit-learn, and plain HTML/CSS/JS (no
+frontend build step). It has 78 automated tests.
 
 ## Software roadmap: real-data experiments
 
@@ -38,7 +74,7 @@ Reports and recordings stay local; Git does not transfer them.
 
 ### Edit online with GitHub Codespaces
 
-Open this private repository on GitHub, choose **Code → Codespaces → Create**,
+Open this repository on GitHub, choose **Code → Codespaces → Create**,
 and select the smallest available machine. Setup installs Python dependencies.
 In the editor's terminal, run:
 
