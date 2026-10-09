@@ -87,20 +87,18 @@ from `/docs`. To preview, serve `docs/` over HTTP (for example
 ## Status and next steps
 
 The roadmap is the builder's 21 steps. Done: Steps 1–16, plus Phase 1
-visibility work (README, report, showcase, MIT license). Open:
+visibility work (README, report, showcase, MIT license). The repo is public, the site is live at
+https://saqlinea.github.io/energy-profiler/ (Pages from `/docs`), and `v1.0` is tagged. Open:
 
 1. **Professor outreach (Nov–Dec 2026):** the goal is a faculty mentor and a
    poster at the BMCC Research Symposium (May 2027). See the "IMPORTANT
    TIMELINE" session and the builder's transfer-plan doc. Keep the public site
    under "SaqlineA": the builder said no real name publicly.
-2. **Going public:** the builder makes the repo public, then enables Pages
-   (branch `codex/online-workspace`, folder `/docs`). Then tag `v1.0`.
-3. **Resume:** update the resume project section (`resume.html`, local only)
-   after the builder confirms.
-4. **Step 17 (ESP32):** the builder is buying an AITRIP ESP32-WROOM-32 (USB-C,
+2. **Resume:** `resume_college.html` and its PDF were updated on 2026-10-08. `resume.html` was not updated.
+3. **Step 17 (ESP32):** the builder is buying an AITRIP ESP32-WROOM-32 (USB-C,
    CP2102). Write a starter Arduino sketch (Wi-Fi, NTP, batched POSTs to
    `/api/sensor/readings` with the token).
-5. **Calibration experiment (by January 2027):** preregister "simulator timing
+4. **Calibration experiment (by January 2027):** preregister "simulator timing
    plus per-home power calibration".
    - **Leading design:** label-free. The ON-power level is the median jump in
      the aggregate at predicted switch-ons.
@@ -108,7 +106,7 @@ visibility work (README, report, showcase, MIT license). Open:
      House 11 once.
    - Optionally ask the builder about longer slices (about a week per house,
      roughly 12 MB each).
-6. **Later research:**
+5. **Later research:**
    - leave-one-house-out across more REFIT houses;
    - a seq2point baseline via NILMTK;
    - smart-plug real data with no mains work;
