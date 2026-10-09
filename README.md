@@ -12,7 +12,7 @@ down before it runs, and every result says whether it was tested and trained on
 real or simulated data, including the results that went badly.
 
 📄 **[Read the report](docs/report.md)** ([PDF](docs/report.pdf)) ·
-🌐 **[Project page](docs/index.html)** · 🧪 [All experiment write-ups](#software-roadmap-real-data-experiments)
+🌐 **[Project page](https://saqlinea.github.io/energy-profiler/)** · 🧪 [All experiment write-ups](#software-roadmap-real-data-experiments)
 
 ## Key findings
 
