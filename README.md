@@ -1,135 +1,54 @@
-# Current — Energy Profiler
+# Current: an energy profiler
 
-**Current shows a home's live electricity use and tests, honestly, whether machine
-learning can tell which appliances are running from the total power alone.**
+Current watches a home's total electricity use and tries to figure out which
+appliances are running, using nothing but that one power reading. It runs as a
+live dashboard on your own computer, fed by either a simulator or real household
+recordings.
 
-![The Current dashboard: hero, live power stats, the power chart and the simulation lab](docs/img/dashboard.webp)
+![The Current dashboard: live power stats, the power chart and the simulation lab](docs/img/dashboard.webp)
 
-It is a household energy lab: a realistic simulator and real recordings from the
-public [REFIT dataset](https://zenodo.org/records/5063428)
-go through the same pipeline into a live dashboard. Every experiment is written
-down before it runs, and every result says whether it was tested and trained on
-real or simulated data, including the results that went badly.
+I started this to learn how machine learning works on real sensor data, and it
+turned into a small research project. The main thing I learned is that a model
+can look great on one house and fall apart on the next one, so I wrote down every
+experiment's rules before running it and kept the results that went badly.
 
-📄 **[Read the report](docs/report.md)** ([PDF](docs/report.pdf)) ·
-🌐 **[Project page](https://saqlinea.github.io/energy-profiler/)** · 🧪 [All experiment write-ups](#software-roadmap-real-data-experiments)
+**[Read the report](docs/report.md)** ([PDF](docs/report.pdf)) ·
+**[Project page](https://saqlinea.github.io/energy-profiler/)** ·
+[All experiment write-ups](#experiment-write-ups)
 
-## Key findings
+## What I found
 
-Refrigerator detection from whole-house power (REFIT), plus one synthetic washer
-experiment. F1 rewards finding the appliance's ON periods without false alarms
-(1.0 is perfect, 0 means it never finds them).
+Most of the work is about detecting the refrigerator from whole-house power,
+using real homes from the public [REFIT dataset](https://zenodo.org/records/5063428).
+F1 is the score: 1.0 means the model finds every period the fridge is on with no
+false alarms, and 0 means it never finds them.
 
 | Result | Data | F1 | What it means |
 |---|---|---:|---|
-| Fixed a timing bug before any modelling | REFIT House 1 | — | Only 8 usable windows at 8 s; a label-blind 16 s rule gave 4,368 |
-| Best model on the development house | Trained on REFIT Houses 1, 3, 4 → tested on House 2 | **0.781** | Looked like a working fridge detector |
-| **Same model on an unseen house (scored once)** | Tested on REFIT House 5 | **0.297** | The development score did not carry over |
-| Simulator-trained model, same unseen house | Simulated homes → House 5 | **0.686** | **The simulator beat the real-house training** |
+| Fixed a timing bug before any modelling | REFIT House 1 | n/a | Only 8 usable windows at 8 s; a 16 s rule gave 4,368 |
+| Best model on the development house | Trained on Houses 1, 3, 4, tested on House 2 | **0.781** | Looked like a working fridge detector |
+| **Same model on an unseen house (scored once)** | Tested on House 5 | **0.297** | The development score did not carry over |
+| Simulator-trained model, same unseen house | Simulated homes, tested on House 5 | **0.686** | The simulator beat training on real houses |
 | Always-off baseline | House 5 | 0.000 | What "no skill" looks like |
-| Every house held out once (preregistered) | REFIT Houses 1–5, real training | **0.339–0.520** | The score depends heavily on which home is tested |
-| Same rotation, simulator-trained | Simulated homes → each of Houses 1–5 | **0.280–0.874** | Better detection in 4 of 5 homes, but often worse power estimates |
-| Washing-machine detection (synthetic) | Simulated homes | 0.701 | Finds most heating, misses low-power phases |
+| Every house held out once | Houses 1–5, real training | **0.339–0.520** | The score depends a lot on which home you test |
+| Same rotation, simulator-trained | Simulated homes, each of Houses 1–5 | **0.280–0.874** | Better detection in 4 of 5 homes, but often worse power estimates |
+| Washing machine (simulated only) | Simulated homes | 0.701 | Finds the heating phase, misses the low-power phases |
 
-Full numbers, methods and limits: [final test](docs/final-test.md) ·
+Details for each result: [final test](docs/final-test.md) ·
 [every-house follow-up](docs/cross-house.md) ·
-[fridge development v1–v4](docs/fridge-development.md) ·
+[fridge development](docs/fridge-development.md) ·
 [washer experiment](docs/washer-experiment.md).
 
-**Limits.** These are bounded REFIT slices (about a day per house for the model tests), with one
-seed and five houses. Nothing here has been validated on a physical
-sensor. This is a learning and research project, not a billing meter or safety
-device.
+**Limits.** These are short slices of REFIT (about a day per house), one random
+seed and five houses. Nothing has been tested on a physical sensor yet. It's a
+learning and research project, not a billing meter or a safety device.
 
-**Built with** Python, FastAPI, SQLite, scikit-learn, and plain HTML/CSS/JS (no
-frontend build step). It has 80 automated tests.
+Built with Python, FastAPI, SQLite, scikit-learn and plain HTML/CSS/JS (no build
+step), with 80 automated tests.
 
-## Software roadmap: real-data experiments
+## Running it
 
-See the [software roadmap guide](docs/software-roadmap.md) for real CSV replay,
-frozen-model evaluation, realistic simulation, research comparisons, dashboard
-analytics and the local sensor contract. It includes measured results and important
-limitations. [REFIT first look](docs/refit-first-look.md) explains the source data.
-The [extended REFIT check](docs/extended-refit-check.md) adds 9,800 real readings,
-five saved stress-test reports and the dashboard usability refresh.
-
-Later milestones are documented in:
-- [Fridge development v1–v4](docs/fridge-development.md): timing fix, relative
-  features and multi-house training.
-- [Final House 5 test](docs/final-test.md): real-trained vs synthetic-trained
-  models.
-- [Simulator fridge v2](docs/simulator-fridge-v2.md).
-- [Experiment visualization](docs/experiment-visualization.md): how to read the dashboard charts.
-- [Washing machine](docs/washing-machine-profile.md): the real REFIT profile, and the [simulator v2 design and results](docs/washing-machine-design.md).
-- [Sensor setup](docs/sensor-setup.md): send readings from a device on your home network (Step 16; no hardware validated yet).
-
-To inspect any saved result, open **Experiments** in the dashboard and pick a
-report. The page then shows:
-- **TESTED ON / TRAINED ON** badges for real or synthetic data.
-- The dataset, model, F1, MAE and energy, with a plain-language explanation.
-- An ON/OFF strip comparing actual and predicted states.
-- Actual vs. predicted watts.
-- The prediction error (predicted − actual).
-
-Reports and recordings stay local; Git does not transfer them.
-
-## Run
-
-### Edit online with GitHub Codespaces
-
-Open this repository on GitHub, choose **Code → Codespaces → Create**,
-and select the smallest available machine. Setup installs Python dependencies.
-In the editor's terminal, run:
-
-```bash
-python app.py
-```
-
-Open **Ports → 8000 → Open in Browser**. Keep port visibility **Private**:
-GitHub sign-in protects this preview; the app itself has no login. Never change
-it to Public. Only this Codespace's exact HTTPS preview address is additionally
-allowed; local security checks remain enabled. Unsupported forwarding domains
-stop startup instead of opening access broadly.
-Start with `python app.py`: it disables Uvicorn's proxy-header interpretation so
-GitHub's rewritten HTTP localhost Host/Origin pair remains consistent. The browser
-connection still uses HTTPS. Do not substitute a default `uvicorn app:app` launch.
-
-- Change `static/index.html` for page structure, `static/style.css` for design,
-  `static/app.js` for browser behavior, and `app.py` for the Python server.
-- Save a file, then refresh the preview. For Python edits, press Ctrl+C in the
-  server terminal and run `python app.py` again. Run `python -m unittest -q`
-  before saving changes to GitHub.
-- Use **Source Control → Commit → Sync Changes** to back up code to the repository.
-  Local and cloud copies do not automatically sync: commit/push, then pull in
-  the other copy before editing there.
-- Reopen your existing workspace from [Your Codespaces](https://github.com/codespaces).
-  Avoid making a new workspace every time. Run the server again after a stop.
-- Stop the Codespace when finished. This is an online development environment,
-  **not 24/7 hosting**. Compute and storage have quotas; check GitHub's usage page
-  and do not enable paid overages unless you want them.
-- `data/`, recordings, trained models, logs, secrets, and personal notes are ignored
-  by Git. Your computer's saved readings are not uploaded. Cloud-generated data
-  stays in that Codespace, not the repository: export/download anything important
-  before deleting the Codespace or its retention period expires.
-
-Configuration follows the [Dev Container specification](https://containers.dev/implementors/json_reference/)
-and [GitHub's private port-forwarding documentation](https://docs.github.com/en/codespaces/developing-in-a-codespace/forwarding-ports-in-your-codespace).
-
-### Run on your computer
-
-```powershell
-.\.venv\Scripts\python.exe app.py
-```
-
-Open http://127.0.0.1:8000. Keep the terminal running. Use one server process.
-After editing Python code, restart the server; after editing browser code, refresh.
-The app binds to localhost, has no authentication, and must not be exposed publicly.
-Browser writes must come from the same origin; non-local Host headers are rejected
-unless using the exact private Codespaces preview described above.
-This is not authentication against other local programs. Data stays local; the
-existing stylesheet optionally fetches Google Fonts (system fonts work offline).
-
-On a fresh computer with Python 3.11+:
+You need Python 3.11 or newer.
 
 ```powershell
 python -m venv .venv
@@ -137,61 +56,76 @@ python -m venv .venv
 .\.venv\Scripts\python.exe app.py
 ```
 
-## Try the upgrade
+Then open http://127.0.0.1:8000. Restart the server after changing Python code;
+just refresh the page after changing anything in `static/`.
 
-1. Watch the simulator. Predictions begin after five readings. Switches still
-   select manual mode; the Pause control stops collection.
-2. Under **Choose your data**, select `examples/replay-demo.csv`, interval **1**,
-   click **Load CSV**, then **Replay CSV / restart**. This is a hand-authored
-   synthetic fixture, NOT a real household recording. Watch the blank reading
-   and timestamp gap: neither becomes zero watts, and the chart breaks there.
-3. Observe measured watts separately from ML estimates. Unknown labels stay unknown.
-4. Review per-appliance precision, recall, F1, power MAE, energy error, and the
-   two baseline scores. Open the JSON report for provenance and positive support.
-5. **Start simulator** starts a new session without deleting saved readings.
-   Replay ends at the last row; use its restart button to play again.
+The app has no login, so it only listens on your own computer. Don't expose it to
+the internet.
 
-The example is deliberately too short for training. Use a substantially longer,
-labeled recording to train a recorded-data model.
+**GitHub Codespaces.** You can also run it in a Codespace (Code → Codespaces →
+Create). Start it with `python app.py`, then open Ports → 8000 in the browser and
+keep the port **Private**. Use `python app.py` rather than a plain `uvicorn`
+command, because it sets up the proxy handling Codespaces needs. Codespaces has
+usage limits, so stop it when you're done. Your local data isn't uploaded, and
+anything created in a Codespace stays there unless you download it.
 
-## Architecture and reading order
+## Things to try
+
+1. Watch the simulator for a bit. Predictions start after five readings, and the
+   switches let you turn appliances on and off by hand.
+2. Under **Choose your data**, load `examples/replay-demo.csv` with interval 1,
+   then press **Replay CSV / restart**. This file is a small made-up example, not
+   a real home. Notice that the blank reading and the time gap don't turn into
+   zero watts; the chart just breaks there.
+3. Compare the measured watts with the model's estimates. Unknown labels stay
+   unknown instead of being treated as off.
+4. Check the per-appliance scores (precision, recall, F1, power error, energy
+   error) next to the two baselines.
+5. Open **Experiments** to look through saved results. Each one is labeled with
+   whether it was trained and tested on real or simulated data, and shows an
+   on/off strip, actual vs. predicted watts and the error over time.
+
+The demo file is too short to train on. For that you need a longer labeled
+recording.
+
+## How it works
 
 ```text
-simulator.py / normalized CSV (sources.py)
-                ↓ timestamps, aggregate watts, optional measured labels
-app.py: source selection → gap/cadence checks → last 5 aggregate readings
-                ↓
+simulator.py or a CSV recording (sources.py)
+        ↓  timestamps, total watts, optional per-appliance labels
+app.py: picks the source, checks for gaps, keeps the last 5 readings
+        ↓
 features.py: watts, change, mean, variation, minimum, maximum
-                ↓
-ml.py: per-appliance state probabilities + estimated watts
-                ↓
-storage.py: raw measurement + truth + prediction + quality + model/source ID
-                ↓
-FastAPI snapshots → static/app.js dashboard
+        ↓
+ml.py: chance each appliance is on, plus estimated watts
+        ↓
+storage.py: saves the reading, the truth, the prediction and the model version
+        ↓
+FastAPI → static/app.js dashboard
 
-offline: prepare_recording.py → evaluate.py → versioned model + JSON report
+offline: prepare_recording.py → evaluate.py → saved model + JSON report
 ```
 
-Inference receives only aggregate power history. Labels never enter its features.
-The latest timestamp is the prediction target: **no future samples** and no
-midpoint-window latency. Five points require four intervals of warm-up, including
-after gaps, source changes, and model replacement. Event notifications separately
-require three consecutive confident predictions; that adds two sample intervals.
+A few rules I kept throughout:
 
-The model uses multi-output random forests, not a separate class for every possible
-combination. Bit masks remain in exports as a backwards-compatible presentation
-format, not the new training target. The old one-watt/joint classifier remains an
-evaluation baseline. The second baseline always predicts all appliances off.
+- The model only ever sees total power. Appliance labels are used for scoring,
+  never as inputs.
+- It predicts the latest reading using only past readings, never future ones.
+- A gap in the data is a gap. Nothing gets filled in, and missing values stay
+  blank instead of becoming zero.
+- The model can say "not sure" when a reading is outside what it was trained on.
+  That's a rough rule of thumb, not a calibrated probability.
 
-## Bring a real recording
+The live model is a multi-output random forest. A simpler one-watt classifier and
+an always-off model stay around as baselines.
 
-Obtain a household dataset under its provider's access and license terms. This
-repository does not download or redistribute UK-DALE, REFIT, REDD, or others.
-Do not assume a dataset column represents a particular appliance: consult its
-household/meter metadata. Choose **active power in watts**, not apparent power or
-cumulative energy. Mixed units must be converted before ingestion.
+## Using your own recording
 
-Normalized CSV:
+Get a dataset you're allowed to use (this repo doesn't include or download
+REFIT, UK-DALE or REDD). Check the dataset's documentation for which column is
+which appliance, and use **active power in watts**.
+
+The app reads this CSV format:
 
 ```csv
 timestamp,total_watts,lamp,refrigerator,microwave
@@ -199,183 +133,121 @@ timestamp,total_watts,lamp,refrigerator,microwave
 2026-01-01T00:00:01Z,161,11,150,0
 ```
 
-- Required: `timestamp`, `total_watts`. Optional: the three measured appliance columns.
-- Blank = unknown. Only write `0` when the submeter actually reports zero.
-- Timestamps must have a timezone, be unique, and increase strictly.
-- One household/continuous recording per file. Separate households into files.
-- Power must be finite and within 0–1,000,000 W (a numeric safety bound, not the
-  model's detection range). No net-export support or automatic resampling.
-- Import limit: 5 MB and 50,000 rows. Select a representative slice for this prototype.
-- Set the real sample interval in the dashboard. Playback advances one row per
-  wall-clock second, but calculations use original timestamps, not playback speed.
+- `timestamp` and `total_watts` are required; the appliance columns are optional.
+- Leave a cell blank when you don't know the value. Only write `0` when the meter
+  really read zero.
+- Timestamps need a timezone and have to go strictly forward.
+- One home per file. Up to 5 MB or 50,000 rows.
 
-For differently named columns, `prepare_recording.py` is a streaming converter.
-Example with **illustrative column names; replace them using your dataset metadata**:
+If your columns are named differently, `prepare_recording.py` converts them (the
+column names below are just examples):
 
 ```powershell
-.\.venv\Scripts\python.exe prepare_recording.py source.csv recording.csv --timestamp Time --timestamp-format unix --mains Aggregate --lamp LightMeter --refrigerator FridgeMeter --microwave MicrowaveMeter --limit 10000 --origin "Dataset reference; household identifier"
+.\.venv\Scripts\python.exe prepare_recording.py source.csv recording.csv --timestamp Time --timestamp-format unix --mains Aggregate --refrigerator FridgeMeter --limit 10000 --origin "Dataset name; house"
 ```
 
-Omit appliance mappings when unknown. Use `--scale 1000` only if **all mapped power
-columns** are in kW. Use `--start` to select a later slice. ISO timestamps with an
-offset are accepted by default; `--timestamp-format unix` means Unix **seconds**.
-The converter validates the result, refuses overwrites, and creates a metadata
-sidecar with your source reference, mapping, units conversion, and output hash.
-Keep this sidecar with your experiment. The dashboard records the CSV hash/name;
-it does not automatically import sidecar metadata or independently verify origin.
+It checks the result, won't overwrite an existing file, and writes a small
+metadata file recording where the data came from. Use `--scale 1000` only if
+every power column is in kW.
 
-## Training and honest evaluation
+## Testing models fairly
 
-The dashboard can train on synthetic data or the loaded labeled CSV. Training
-runs off the sampling loop. A new model is activated only after successful fitting,
-evaluation, and saving. Appliance thresholds are defined in `ml.py` and copied into
-every report; adapt them deliberately for a real dataset and keep them fixed when
-comparing experiments.
+Training never touches the test data:
 
-**Synthetic:** 60 training households and a fixed seed-10042 set of 20 held-out
-households. Retraining changes the training seed, not the held-out test set.
-Synthetic appliances have nominal powers 10, 150, and 1200 W, ±3% household variation
-and ±2 W sample noise. Synthetic windows number 5,760 train / 1,920 test.
-
-**Recorded:** split raw rows chronologically 70/30 **before** building windows.
-No window crosses the split or a gap. All three labels are required for a scored
-training/test window. Missing labels exclude the window rather than becoming off.
-A minimum of 34 raw rows is enforced, but that is a technical minimum, not a useful
-evaluation dataset. Use many complete appliance cycles and a genuinely separate
-household when possible. Windows overlap within each partition; repeated trials on
-the same holdout can still overfit your experiment choices. Keep a final untouched
-dataset for any performance claim.
-
-Offline evaluation does not replace the running server's active model:
+- **Simulated:** 60 training homes and a fixed set of 20 test homes.
+- **Recorded:** the recording is split 70/30 by time before anything else, and
+  no window crosses the split or a gap.
+- **Best option:** train on one house and test on a completely different one.
 
 ```powershell
-# Fixed synthetic benchmark
+# Simulated benchmark
 .\.venv\Scripts\python.exe evaluate.py --output data/experiments/synthetic
 
-# Chronological split of a labeled recording sampled every 8 seconds
+# One labeled recording, split by time, sampled every 8 seconds
 .\.venv\Scripts\python.exe evaluate.py --csv recording.csv --cadence 8 --output data/experiments/recorded
 
-# Stronger: explicitly separate household/session holdout
+# Train on one house, test on another
 .\.venv\Scripts\python.exe evaluate.py --csv training-house.csv --test-csv heldout-house.csv --cadence 8 --output data/experiments/heldout
 ```
 
-Separate-file evaluation rejects identical files and exact duplicated measurements.
-You remain responsible for selecting genuinely independent households and avoiding
-near-duplicates. Reports include dataset hashes, split policy, feature schema,
-cadence, threshold policy, seed, library version, and model version.
+Every report saves the data hashes, the split, the features, the settings and the
+model version, so results can be checked later. One thing I learned the hard way:
+if you keep testing on the same house while tuning, you end up tuning to that
+house. Keep a final house untouched until the very end.
 
-Metrics:
+What the scores mean:
 
-- Precision: how often a predicted on-state is right.
-- Recall: how often a real on-state is detected.
-- F1: balance of precision and recall. Check positive support; zero positives
-  cannot demonstrate detection ability.
-- MAE: mean absolute error in estimated appliance watts.
-- Energy error: absolute difference of integrated predicted/measured kWh over
-  adjacent scored intervals. Check `energy_coverage_seconds`; excluded gaps and
-  warm-up periods are not included. Signed errors can cancel in total energy.
-- Exact combination accuracy remains for comparison, but can hide weak appliances.
+- **Precision:** when the model says "on", how often it's right.
+- **Recall:** how many of the real "on" periods it catches.
+- **F1:** a balance of the two.
+- **MAE:** average error in estimated watts.
+- **Energy error:** difference between predicted and measured kWh, counted only
+  over stretches without gaps.
 
-Held-out metrics score **raw model output before abstention**. Live session metrics
-exclude warm-up/missing/cadence-mismatch windows, count abstentions as wrong, and
-show prediction coverage. Session results mix model versions and replay may include
-training rows; they are not a separate held-out benchmark.
+Energy uses the trapezoid rule and skips any interval with a missing reading or
+a gap longer than 1.5 times the sample interval.
 
-## Missing data, energy, and uncertainty
+## Data and saved models
 
-Replay uses trapezoidal integration: `(previous_W + current_W) / 2 × delta_seconds
-/ 3,600,000`. The first point has no preceding interval and contributes no energy.
-An interval is excluded when either aggregate reading is missing or elapsed time
-exceeds 1.5× the declared cadence. Covered/skipped seconds appear in the dashboard.
-There is no interpolation over gaps. Inference additionally requires intervals
-within ±20% of cadence; irregular samples restart the window. Models trained at a
-different declared cadence abstain until you train an appropriate model.
-
-Simulation retains its original rule: each recorded sample represents one simulated
-second, including the first. Pauses do not add energy. Its timestamps follow a
-logical simulation clock, so after pausing they are not wall-clock acquisition times.
-
-Measured appliance energy is shown only for covered intervals with both labels;
-partial coverage is not a full-session total. The API includes per-device coverage.
-Changing the illustrative tariff reprices covered session energy only.
-
-Predictions may abstain for an ambiguous score, out-of-training power range, or
-large unexplained residual. Unexplained watts = aggregate minus estimated known
-appliance watts; this can be negative due to model error. These are **heuristics**,
-not reliable unknown-device detection or calibrated probabilities. Never use this
-prototype for safety decisions, billing, or claims of exact appliance identification.
-
-## Persistence and compatibility
-
-- Readings: `data/readings.sqlite3`, with WAL for concurrent exports and collection.
-- The upgrade copies old rows/IDs into `readings_v2` transactionally and preserves
-  the original `readings` table. It is safe to restart; legacy rows are not duplicated.
-- Models: versioned `data/models/*.joblib` and `current.json`. Training publishes
-  the manifest last; startup verifies the checksum/schema/library version and loads
-  once, rather than retraining or reloading at every prediction.
-- **Joblib is executable serialization. Never load downloaded or uploaded model
-  files.** Hashes detect corruption, not malicious local file replacement. Only
-  this app's trusted local model directory is loaded.
-- Incompatible/corrupt artifacts stop startup. Preserve them for diagnosis and run
-  offline training into a fresh directory; do not silently replace recorded models.
-- Restarting resets the live session and returns to the simulator; tariff, history,
-  and trained model persist. Uploaded replay buffers are in memory, so reload the
-  original CSV after restart. Source SHA-256 IDs remain in recorded readings.
-- Export retains missing values as blanks and adds source, quality, covered
-  interval, model version, and per-appliance predictions. Old sessions remain.
-- Original learning scripts remain. Existing `power_readings.csv` and notes stay
-  on the original computer and are deliberately excluded from Git.
+- Readings are stored in `data/readings.sqlite3`. Older databases are upgraded
+  in place without losing rows.
+- Trained models are saved in `data/models/` with a checksum, and the app checks
+  it on startup. **Never load a model file you downloaded from somewhere else**,
+  because model files can run code.
+- `data/`, recordings, models and logs are all kept out of Git.
 
 ## API
 
-| Endpoint | Purpose |
+| Endpoint | What it does |
 | --- | --- |
-| `GET /api/dashboard` | Consistent state/history snapshot; `after_id` + `session` for incremental polling. |
-| `GET /api/state`, `GET /api/readings` | State or current-session history. |
-| `POST /api/replay?cadence=1&name=recording.csv` | Raw UTF-8 CSV body (`text/csv`); validates before replacing the in-memory buffer. |
-| `POST /api/source` | `{"source":"replay"}` or `{"source":"simulator"}`; starts a new session. |
-| `POST /api/simulation` | Pause/resume; simulator-only auto/manual mode. |
-| `POST /api/appliances/lamp` | Simulator-only `{"is_on":true}`. |
-| `POST /api/tariff` | `{"rate":0.20}`; persisted finite illustrative rate. |
-| `POST /api/model/train` | `{"source":"synthetic"}` or `{"source":"recorded"}`. |
-| `GET /api/model/report` | Current held-out evaluation and provenance. |
-| `GET /api/export.csv` | All saved sessions; nullable fields preserved. |
+| `GET /api/dashboard` | Current state and history (supports incremental updates) |
+| `GET /api/state`, `GET /api/readings` | State, or this session's readings |
+| `POST /api/replay?cadence=1&name=recording.csv` | Upload a CSV to replay |
+| `POST /api/source` | Switch between `replay` and `simulator` |
+| `POST /api/simulation` | Pause or resume, auto or manual mode |
+| `POST /api/appliances/lamp` | Turn the simulated lamp on or off |
+| `POST /api/tariff` | Set the electricity price used for cost estimates |
+| `POST /api/model/train` | Train on `synthetic` or `recorded` data |
+| `GET /api/model/report` | The current model's test results |
+| `GET /api/export.csv` | Download every saved session |
 
-Interactive API docs: http://127.0.0.1:8000/docs.
-Source changes and training are not safe to retry blindly after a timeout: check
-`/api/state` or the model report first. They create new sessions/model versions.
+Interactive docs are at http://127.0.0.1:8000/docs while the app is running.
 
-Request-boundary middleware follows the
-[FastAPI middleware pattern](https://fastapi.tiangolo.com/tutorial/middleware/)
-and [TrustedHostMiddleware](https://fastapi.tiangolo.com/advanced/middleware/#trustedhostmiddleware).
-
-## Verify and learn
+## Tests
 
 ```powershell
 .\.venv\Scripts\python.exe -m unittest -v
 node --check static/app.js
 ```
 
-Tests use temporary databases and cover old functionality plus replay, gaps,
-nullable labels, source controls, cadence mismatch, causality, data splits,
-baselines, model round trips/checksums, provenance, and non-destructive migration.
-Node is optional; only the JavaScript syntax check needs it.
+The tests use temporary databases and cover replay, gaps, blank labels, timing,
+data splits, baselines, saving and loading models, and database upgrades. Node
+is only needed for the JavaScript syntax check.
 
-Suggested learning exercise: change the window size in `features.py`, retrain in
-a fresh experiment directory, and explain whether F1 improves versus the **same**
-held-out data and single-watt baseline. Do not judge changes only by a prettier graph.
+## Experiment write-ups
 
-## Architecture references
+- [REFIT first look](docs/refit-first-look.md) and [extended REFIT check](docs/extended-refit-check.md)
+- [Fridge development v1–v4](docs/fridge-development.md)
+- [Final House 5 test](docs/final-test.md)
+- [Every-house follow-up](docs/cross-house.md)
+- [Simulator fridge v2](docs/simulator-fridge-v2.md)
+- [Washing machine profile](docs/washing-machine-profile.md) and [simulator design](docs/washing-machine-design.md)
+- [Reading the dashboard charts](docs/experiment-visualization.md)
+- [Sending readings from a home sensor](docs/sensor-setup.md) (software only; no hardware tested yet)
+- [Software roadmap](docs/software-roadmap.md)
 
-Original implementation inspired by ideas, not copied source or bundled dependencies:
+## Credits
 
-- [NILMTK](https://github.com/nilmtk/nilmtk): data contracts, alignment, evaluation.
-- [NILMTK-contrib](https://github.com/nilmtk/nilmtk-contrib): model interfaces and explicit window alignment.
-- [goruck/nilm](https://github.com/goruck/nilm): appliance-specific preprocessing/inference pipeline.
-- [Emoncms](https://github.com/emoncms/emoncms): input/history separation and missing-data semantics.
-- [NILMbench](https://github.com/nilmtk/nilmbench): fixed splits and experiment provenance.
+These projects shaped how I approached the problem. None of their code is
+copied or bundled here.
 
-Remaining research work: obtain/label real recordings, map their actual appliances,
-validate thresholds and uncertainty on unseen households, and compare stronger
-models. A future sensor adapter can feed the same reading contract; no firmware or
-mains-wiring instructions are included because this project has no hardware yet.
+- [NILMTK](https://github.com/nilmtk/nilmtk) and [NILMTK-contrib](https://github.com/nilmtk/nilmtk-contrib): data handling and evaluation
+- [goruck/nilm](https://github.com/goruck/nilm): per-appliance pipeline
+- [Emoncms](https://github.com/emoncms/emoncms): handling missing data
+- [NILMbench](https://github.com/nilmtk/nilmbench): fixed test splits
+
+## What's next
+
+Recording real data with smart plugs (no mains wiring), testing on more REFIT
+houses, comparing against a published deep-learning baseline, and connecting a
+real sensor through the same input the simulator uses.
