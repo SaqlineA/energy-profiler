@@ -18,5 +18,13 @@ notes.md
 *Resume*.pdf
 resume*.html
 
-# Private outreach drafts (real name; sent by the builder, never committed)
+# Private outreach drafts (never committed)
 outreach/
+
+# Local tool settings (kept on this computer only)
+CLAUDE.md
+.impeccable/
+.design-rules/
+tasks/
+graphify-out/
+docs/img/*.json
