@@ -215,9 +215,9 @@ rough uncertainty check.
 1. **More houses.** Extend the hold-one-out test from five houses to more of
    REFIT's 20, with longer slices. Then test an idea from Section 6: use the
    simulator to learn timing, plus a small power calibration for each home.
-2. **A published baseline,** such as sequence-to-point learning (Zhang et al.,
-   2018) through NILMTK (Batra et al., 2014), so these numbers can be compared
-   with known methods.
+2. **A published baseline,** such as sequence-to-point learning
+   (Zhang et al., 2018) through NILMTK (Batra et al., 2014), so these numbers
+   can be compared with known methods.
 3. **A new sealed test house,** since House 5 has been used.
 4. **My own real data, collected safely.** Smart plugs with energy monitoring on
    a few appliances would give per-appliance labels. Plugging several appliances
